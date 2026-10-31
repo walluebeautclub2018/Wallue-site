@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#32104f">
+<title>Wallue Conecta — Conexões que transformam</title>
+<style>
+:root{--purple:#32104f;--gold:#e4c078;--cream:#fffaf5;--ink:#30243a;--muted:#746b79}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font:16px/1.5 Arial,sans-serif}
+header{background:var(--purple);color:white;padding:24px 18px;text-align:center}header strong{display:block;color:var(--gold);letter-spacing:4px;font-size:28px}header span{font-size:14px}
+main{max-width:980px;margin:auto;padding:28px 18px 56px}.hero{text-align:center;padding:24px 0 30px}.hero h1{color:var(--purple);font-size:clamp(30px,5vw,46px);line-height:1.12;margin:0 0 12px}.hero p{max-width:620px;margin:0 auto;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin:22px 0 28px}.plan,.panel{background:white;border:1px solid #eadfcf;border-radius:16px;padding:20px}.plan h3{margin:0;color:var(--purple)}.price{font-size:28px;font-weight:700;color:var(--purple);margin:8px 0}.price small{font-size:13px;font-weight:400;color:var(--muted)}.panel{max-width:650px;margin:0 auto}.tabs{display:flex;gap:8px;margin-bottom:18px}.tabs button{flex:1}.tabs button,.primary{border:0;border-radius:24px;padding:12px 16px;font-weight:700;cursor:pointer}.tabs button{background:#f1e6d8;color:var(--purple)}.tabs button.active,.primary{background:var(--purple);color:white}
+label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,select{width:100%;padding:12px;border:1px solid #d9cddd;border-radius:9px;font:inherit;background:white}button:disabled{opacity:.6;cursor:wait}.primary{width:100%;margin-top:18px}.message{padding:12px;border-radius:9px;margin-top:14px;background:#f1e6d8;color:var(--purple);display:none}.message.error{background:#fff0ee;color:#9b2c20}.fine{font-size:12px;color:var(--muted);margin-top:14px}.hidden{display:none}footer{text-align:center;background:var(--purple);color:white;padding:22px}footer strong{color:var(--gold)}
+</style>
+</head>
+<body>
+<header><strong>WALLUE CONECTA</strong><span>Conexões que transformam</span></header>
+<main>
+<section class="hero"><h1>Oportunidades que aproximam.</h1><p>Conectamos clientes a profissionais e espaços de beleza. Crie sua conta para fazer parte dessa rede.</p></section>
+<section class="grid" aria-label="Planos">
+<article class="plan"><h3>Profissional autônomo</h3><div class="price">R$ 16,99 <small>/ mês</small></div><p>Para profissionais que desejam ampliar sua presença e encontrar novos clientes.</p></article>
+<article class="plan"><h3>Proprietário de salão</h3><div class="price">R$ 16,99 <small>/ mês</small></div><p>Para salões que desejam divulgar seus serviços e oportunidades.</p></article>
+<article class="plan"><h3>Cliente</h3><div class="price">R$ 3,99 <small>/ mês</small></div><p>Para encontrar profissionais e serviços de beleza.</p><p><strong>Promoção:</strong> primeiro mês gratuito para os primeiros 100 clientes elegíveis.</p></article>
+</section>
+<section class="panel">
+<div class="tabs"><button id="signupTab" class="active" type="button">Criar conta</button><button id="loginTab" type="button">Entrar</button></div>
+<form id="authForm">
+<div id="signupFields">
+<label for="fullName">Nome completo</label><input id="fullName" autocomplete="name" required>
+<label for="profile">Quero me cadastrar como</label><select id="profile" required><option value="professional">Profissional autônomo</option><option value="salon">Proprietário de salão</option><option value="client">Cliente</option></select>
+<label for="city">Cidade</label><input id="city" autocomplete="address-level2" placeholder="Ex.: Salvador" required>
+<label for="neighborhood">Bairro</label><input id="neighborhood" placeholder="Seu bairro" required>
+<label for="whatsapp">WhatsApp</label><input id="whatsapp" type="tel" autocomplete="tel" placeholder="(71) 99999-9999" required>
+<label for="service">Principal serviço ou interesse</label><input id="service" placeholder="Ex.: manicure, cabelo, estética">
+</div>
+<label for="email">E-mail</label><input id="email" type="email" autocomplete="email" required>
+<label for="password">Senha (mínimo de 8 caracteres)</label><input id="password" type="password" minlength="8" autocomplete="new-password" required>
+<button class="primary" id="submitButton" type="submit">Criar minha conta</button>
+<div class="message" id="message" role="status" aria-live="polite"></div>
+</form>
+<p class="fine">Os valores exibidos são mensalidades planejadas. A cobrança e a ativação de assinaturas serão habilitadas após a integração segura do pagamento. Nunca compartilhe sua senha.</p>
+</section>
+</main>
+<footer><strong>WALLUE CONECTA</strong><div>Oportunidades que conectam.</div></footer>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+const SUPABASE_URL='https://jfpjokqdaobgxfplupqr.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_ZgS9uChB0Kxc3ssWlbb0lQ_q-G97h9c';
+const supabase=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+const form=document.getElementById('authForm'), signupFields=document.getElementById('signupFields');
+const signupTab=document.getElementById('signupTab'),loginTab=document.getElementById('loginTab');
+const submitButton=document.getElementById('submitButton'),message=document.getElementById('message');
+let mode='signup';
+function setMode(next){mode=next;signupFields.classList.toggle('hidden',mode==='login');document.getElementById('fullName').required=mode==='signup';document.getElementById('profile').required=mode==='signup';document.getElementById('city').required=mode==='signup';document.getElementById('neighborhood').required=mode==='signup';document.getElementById('whatsapp').required=mode==='signup';document.getElementById('service').required=false;document.getElementById('password').autocomplete=mode==='login'?'current-password':'new-password';submitButton.textContent=mode==='login'?'Entrar':'Criar minha conta';signupTab.classList.toggle('active',mode==='signup');loginTab.classList.toggle('active',mode==='login');message.style.display='none'}
+signupTab.addEventListener('click',()=>setMode('signup'));loginTab.addEventListener('click',()=>setMode('login'));
+form.addEventListener('submit',async e=>{e.preventDefault();message.style.display='none';submitButton.disabled=true;submitButton.textContent='Aguarde…';
+try{
+const email=document.getElementById('email').value.trim();const password=document.getElementById('password').value;
+let result;
+if(mode==='signup'){
+const profile=document.getElementById('profile').value;
+const monthly_price=profile==='client'?3.99:16.99;
+result=await supabase.auth.signUp({email,password,options:{emailRedirectTo:location.href.split('?')[0],data:{full_name:document.getElementById('fullName').value.trim(),profile_type:profile,city:document.getElementById('city').value.trim(),neighborhood:document.getElementById('neighborhood').value.trim(),whatsapp:document.getElementById('whatsapp').value.trim(),service_interest:document.getElementById('service').value.trim(),planned_monthly_price:monthly_price}}});
+if(result.error)throw result.error;
+message.textContent=result.data.session?'Conta criada. Você já pode entrar.':'Cadastro recebido. Confira seu e-mail para confirmar a conta antes de entrar.';
+}else{
+result=await supabase.auth.signInWithPassword({email,password});if(result.error)throw result.error;
+message.textContent='Login realizado com sucesso. A próxima etapa será liberar seu painel de acordo com seu perfil.';
+}
+message.className='message';message.style.display='block';if(mode==='signup'&&result.data.session){form.reset();setMode('login')}
+}catch(err){message.textContent=err.message||'Não foi possível concluir. Tente novamente.';message.className='message error';message.style.display='block'}
+finally{submitButton.disabled=false;submitButton.textContent=mode==='login'?'Entrar':'Criar minha conta'}
+});
+</script>
+</body>
+</html>
