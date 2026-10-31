@@ -23,6 +23,11 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 <article class="plan"><h3>Proprietário de salão</h3><div class="price">R$ 16,99 <small>/ mês</small></div><p>Para salões que desejam divulgar seus serviços e oportunidades.</p></article>
 <article class="plan"><h3>Cliente</h3><div class="price">R$ 3,99 <small>/ mês</small></div><p>Para encontrar profissionais e serviços de beleza.</p><p><strong>Promoção:</strong> primeiro mês gratuito para os primeiros 100 clientes elegíveis.</p></article>
 </section>
+<section class="panel" style="margin:0 auto 24px;max-width:980px">
+<h2 style="color:var(--purple);margin-top:0">Encaminhamentos transparentes</h2>
+<p>O profissional paga <strong>R$ 0,99 por encaminhamento válido</strong>, além da mensalidade. A cobrança só poderá ser gerada quando o cliente solicitar o contato, autorizar o compartilhamento e o contato for efetivamente entregue ao profissional. Visualização de perfil ou busca, por si só, não gera cobrança.</p>
+<p class="fine">O sistema registrará cada encaminhamento uma única vez para evitar duplicidade. A cobrança automática será ativada somente após a integração e os testes do meio de pagamento.</p>
+</section>
 <section class="panel">
 <div class="tabs"><button id="signupTab" class="active" type="button">Criar conta</button><button id="loginTab" type="button">Entrar</button></div>
 <form id="authForm">
@@ -60,8 +65,8 @@ const email=document.getElementById('email').value.trim();const password=documen
 let result;
 if(mode==='signup'){
 const profile=document.getElementById('profile').value;
-const monthly_price=profile==='client'?3.99:16.99;
-result=await supabase.auth.signUp({email,password,options:{emailRedirectTo:location.href.split('?')[0],data:{full_name:document.getElementById('fullName').value.trim(),profile_type:profile,city:document.getElementById('city').value.trim(),neighborhood:document.getElementById('neighborhood').value.trim(),whatsapp:document.getElementById('whatsapp').value.trim(),service_interest:document.getElementById('service').value.trim(),planned_monthly_price:monthly_price}}});
+const monthly_price_cents=profile==='client'?399:1699;\nconst plan_code=profile==='client'?'client_monthly':(profile==='salon'?'salon_monthly':'professional_monthly');
+result=await supabase.auth.signUp({email,password,options:{emailRedirectTo:location.href.split('?')[0],data:{full_name:document.getElementById('fullName').value.trim(),profile_type:profile,city:document.getElementById('city').value.trim(),neighborhood:document.getElementById('neighborhood').value.trim(),whatsapp:document.getElementById('whatsapp').value.trim(),service_interest:document.getElementById('service').value.trim(),planned_monthly_price_cents:monthly_price_cents,plan_code:plan_code,referral_fee_cents:profile==='client'?null:99}}});
 if(result.error)throw result.error;
 message.textContent=result.data.session?'Conta criada. Você já pode entrar.':'Cadastro recebido. Confira seu e-mail para confirmar a conta antes de entrar.';
 }else{
