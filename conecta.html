@@ -56,9 +56,12 @@ const supabase=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 const form=document.getElementById('authForm'), signupFields=document.getElementById('signupFields');
 const signupTab=document.getElementById('signupTab'),loginTab=document.getElementById('loginTab');
 const submitButton=document.getElementById('submitButton'),message=document.getElementById('message');
+const checkoutButton=document.createElement('button');checkoutButton.type='button';checkoutButton.className='primary';checkoutButton.textContent='Continuar para pagamento';checkoutButton.style.display='none';form.appendChild(checkoutButton);
 let mode='signup';
 function setMode(next){mode=next;signupFields.classList.toggle('hidden',mode==='login');document.getElementById('fullName').required=mode==='signup';document.getElementById('profile').required=mode==='signup';document.getElementById('city').required=mode==='signup';document.getElementById('neighborhood').required=mode==='signup';document.getElementById('whatsapp').required=mode==='signup';document.getElementById('service').required=false;document.getElementById('password').autocomplete=mode==='login'?'current-password':'new-password';submitButton.textContent=mode==='login'?'Entrar':'Criar minha conta';signupTab.classList.toggle('active',mode==='signup');loginTab.classList.toggle('active',mode==='login');message.style.display='none'}
 signupTab.addEventListener('click',()=>setMode('signup'));loginTab.addEventListener('click',()=>setMode('login'));
+
+checkoutButton.addEventListener('click',async()=>{checkoutButton.disabled=true;checkoutButton.textContent='Preparando checkout…';try{const {data:{user},error:userError}=await supabase.auth.getUser();if(userError||!user)throw new Error('Entre novamente na sua conta.');const plan_code=user.user_metadata?.plan_code;if(!plan_code)throw new Error('Não encontramos seu plano. Entre em contato com o suporte.');const {data,error}=await supabase.functions.invoke('create-subscription',{body:{plan_code}});if(error)throw error;if(!data?.checkout_url)throw new Error(data?.error||'O checkout não foi retornado.');location.href=data.checkout_url;}catch(err){message.textContent=err.message||'Não foi possível abrir o pagamento.';message.className='message error';message.style.display='block';checkoutButton.disabled=false;checkoutButton.textContent='Tentar novamente';}});
 form.addEventListener('submit',async e=>{e.preventDefault();message.style.display='none';submitButton.disabled=true;submitButton.textContent='Aguarde…';
 try{
 const email=document.getElementById('email').value.trim();const password=document.getElementById('password').value;
@@ -71,7 +74,7 @@ if(result.error)throw result.error;
 message.textContent=result.data.session?'Conta criada. Você já pode entrar.':'Cadastro recebido. Confira seu e-mail para confirmar a conta antes de entrar.';
 }else{
 result=await supabase.auth.signInWithPassword({email,password});if(result.error)throw result.error;
-message.textContent='Login realizado com sucesso. A próxima etapa será liberar seu painel de acordo com seu perfil.';
+message.textContent='Login realizado. Você pode continuar para o pagamento do seu plano.';checkoutButton.style.display='block';
 }
 message.className='message';message.style.display='block';if(mode==='signup'&&result.data.session){form.reset();setMode('login')}
 }catch(err){message.textContent=err.message||'Não foi possível concluir. Tente novamente.';message.className='message error';message.style.display='block'}
