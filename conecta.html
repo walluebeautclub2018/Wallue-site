@@ -68,7 +68,8 @@ const email=document.getElementById('email').value.trim();const password=documen
 let result;
 if(mode==='signup'){
 const profile=document.getElementById('profile').value;
-const monthly_price_cents=profile==='client'?399:1699;\nconst plan_code=profile==='client'?'client_monthly':(profile==='salon'?'salon_monthly':'professional_monthly');
+const monthly_price_cents=profile==='client'?399:1699;
+const plan_code=profile==='client'?'client_monthly':(profile==='salon'?'salon_monthly':'professional_monthly');
 result=await supabase.auth.signUp({email,password,options:{emailRedirectTo:location.href.split('?')[0],data:{full_name:document.getElementById('fullName').value.trim(),profile_type:profile,city:document.getElementById('city').value.trim(),neighborhood:document.getElementById('neighborhood').value.trim(),whatsapp:document.getElementById('whatsapp').value.trim(),service_interest:document.getElementById('service').value.trim(),planned_monthly_price_cents:monthly_price_cents,plan_code:plan_code,referral_fee_cents:profile==='client'?null:99}}});
 if(result.error)throw result.error;
 message.textContent=result.data.session?'Conta criada. Você já pode entrar.':'Cadastro recebido. Confira seu e-mail para confirmar a conta antes de entrar.';
