@@ -22,17 +22,19 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 <section class="audiences" aria-label="Públicos da Wallue Conecta"><h2 style="text-align:center">Conexões para todos</h2><p style="text-align:center;margin:0">Três públicos, novas possibilidades.</p><div class="audience-grid"><div class="audience"><div class="audience-icon" aria-hidden="true">♧</div><div><strong>Pessoas</strong><span>Encontram os profissionais de que precisam.</span></div></div><div class="audience"><div class="audience-icon" aria-hidden="true">▣</div><div><strong>Profissionais</strong><span>Divulgam seu talento e conquistam novas oportunidades.</span></div></div><div class="audience"><div class="audience-icon" aria-hidden="true">⌂</div><div><strong>Empresas</strong><span>Encontram talentos, parcerias e pessoas para suas equipes.</span></div></div></div></section>
 <section class="hero" style="display:block;text-align:center;padding:10px 0 0"><h1 style="font-size:clamp(26px,4vw,38px)">Como você quer se conectar?</h1><p style="margin:auto">Escolha o card correspondente ao seu perfil e faça parte dessa rede.</p></section>
 <section class="entry-cards" aria-label="Escolha como deseja se conectar"><article class="entry-card"><div class="professional-art"><img src="https://raw.githubusercontent.com/walluebeautclub2018/Wallue-Conecta--oportunidades-que-criam-conex-es-/main/01-profissionais%20CARD%20DA%20ANA.png" alt="Card oficial da Ana para profissionais"><div class="art-headline">SEU TALENTO<br>MERECE SER<br>ENCONTRADO</div></div><div class="entry-action"><h2>Profissionais</h2><p>Divulgue seus serviços, conquiste novos clientes e amplie suas oportunidades.</p><button type="button" data-profile="professional">Quero me cadastrar</button></div></article><article class="entry-card"><img src="https://raw.githubusercontent.com/walluebeautclub2018/Wallue-Conecta--oportunidades-que-criam-conex-es-/main/02-clientes%20CARD%20DA%20ANA%20CONECTA%202.png" alt="Card oficial da Ana para clientes"><div class="entry-action"><h2>Clientes</h2><p>Encontre profissionais de beleza, estética e bronzeamento perto de você.</p><button type="button" data-profile="client">Quero encontrar profissionais</button></div></article><article class="entry-card"><img src="https://raw.githubusercontent.com/walluebeautclub2018/Wallue-Conecta--oportunidades-que-criam-conex-es-/main/03-conheca-wallue%20CARD%20DA%20ANA%20CONECTA%203.png" alt="Card oficial da Ana para empresas parceiras"><div class="entry-action"><h2>Empresas</h2><p>Apresente sua empresa e participe das oportunidades da Wallue Conecta.</p><button type="button" data-profile="company">Quero ser parceira</button></div></article></section>
-<section class="grid" aria-label="Planos">
-<article class="plan"><h3>Profissional autônomo</h3><div class="price">R$ 16,99 <small>/ mês</small></div><p>Para profissionais que desejam ampliar sua presença e encontrar novos clientes.</p></article>
-<article class="plan"><h3>Proprietário de salão</h3><div class="price">R$ 16,99 <small>/ mês</small></div><p>Para salões que desejam divulgar seus serviços e oportunidades.</p></article>
-<article class="plan"><h3>Cliente</h3><div class="price">R$ 3,99 <small>/ mês</small></div><p>Para encontrar profissionais e serviços de beleza.</p><p><strong>Promoção:</strong> primeiro mês gratuito para os primeiros 100 clientes elegíveis.</p></article>
+<section class="grid" id="planSelection" aria-label="Escolha seu plano">
+<article class="plan"><h3>Profissional autônomo</h3><div class="price">R$ 16,99 <small>/ mês</small></div><p>Para profissionais que desejam divulgar seus serviços e conquistar clientes.</p><button class="primary" type="button" data-plan="professional_monthly" data-profile-choice="professional">Escolher este plano</button></article>
+<article class="plan"><h3>Salão de beleza</h3><div class="price">R$ 16,99 <small>/ mês</small></div><p>Para proprietários de salões que desejam ampliar suas oportunidades.</p><button class="primary" type="button" data-plan="salon_monthly" data-profile-choice="salon">Escolher este plano</button></article>
+<article class="plan"><h3>Cliente</h3><div class="price">R$ 3,99 <small>/ mês</small></div><p>Para encontrar profissionais e serviços de beleza.</p><p><strong>Promoção:</strong> primeiro mês gratuito para os primeiros 100 clientes elegíveis.</p><button class="primary" type="button" data-plan="client_monthly" data-profile-choice="client">Escolher este plano</button></article>
 </section>
+<p class="fine" style="text-align:center">Empresas interessadas em parceria podem iniciar o cadastro pelo card Empresas, sem contratação de mensalidade nesta etapa.</p>
 <section class="panel" style="margin:0 auto 24px;max-width:980px">
 <h2 style="color:var(--purple);margin-top:0">Encaminhamentos transparentes</h2>
 <p>O profissional paga <strong>R$ 0,99 por encaminhamento válido</strong>, além da mensalidade. A cobrança só poderá ser gerada quando o cliente solicitar o contato, autorizar o compartilhamento e o contato for efetivamente entregue ao profissional. Visualização de perfil ou busca, por si só, não gera cobrança.</p>
 <p class="fine">O sistema registrará cada encaminhamento uma única vez para evitar duplicidade. A cobrança automática será ativada somente após a integração e os testes do meio de pagamento.</p>
 </section>
-<section class="panel">
+<section class="panel" id="registrationPanel">
+<div id="selectedPlanNotice" class="message" style="display:block;margin:0 0 16px">Primeiro, escolha seu plano acima. Depois, preencha o cadastro.</div>
 <div class="tabs"><button id="signupTab" class="active" type="button">Criar conta</button><button id="loginTab" type="button">Entrar</button></div>
 <form id="authForm">
 <div id="signupFields">
@@ -41,7 +43,7 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 <label for="city">Cidade</label><input id="city" autocomplete="address-level2" placeholder="Ex.: Salvador" required>
 <label for="neighborhood">Bairro</label><input id="neighborhood" placeholder="Seu bairro" required>
 <label for="whatsapp">WhatsApp</label><input id="whatsapp" type="tel" autocomplete="tel" placeholder="(71) 99999-9999" required>
-<label for="service">Principal serviço ou interesse</label><input id="service" placeholder="Ex.: manicure, cabelo, estética">
+<label for="service">Profissão, serviço ou interesse principal</label><select id="service"><option value="">Selecione uma opção</option><option>Manicure</option><option>Pedicure</option><option>Cabeleireiro(a)</option><option>Barbearia / Barbeiro(a)</option><option>Podologia</option><option>Estética</option><option>Bronzeamento</option><option>Depilação</option><option>Maquiagem</option><option>Design de sobrancelhas</option><option>Massoterapia</option><option>Tranças</option><option>Outro</option></select>
 </div>
 <label for="email">E-mail</label><input id="email" type="email" autocomplete="email" required>
 <label for="password">Senha (mínimo de 8 caracteres)</label><input id="password" type="password" minlength="8" autocomplete="new-password" required>
@@ -65,7 +67,27 @@ const checkoutButton=document.createElement('button');checkoutButton.type='butto
 let mode='signup';
 function syncProfileFields(){const isCompany=document.getElementById('profile').value==='company';document.getElementById('companyFields').classList.toggle('hidden',!isCompany);document.getElementById('companyName').required=isCompany;document.getElementById('neighborhood').required=!isCompany;document.getElementById('service').required=false;}
 document.getElementById('profile').addEventListener('change',syncProfileFields);
-document.querySelectorAll('[data-profile]').forEach(button=>button.addEventListener('click',()=>{setMode('signup');document.getElementById('profile').value=button.dataset.profile;syncProfileFields();document.getElementById('authForm').scrollIntoView({behavior:'smooth',block:'start'});}));
+let selectedPlanCode='';
+const selectedPlanNotice=document.getElementById('selectedPlanNotice');
+document.querySelectorAll('[data-plan]').forEach(button=>button.addEventListener('click',()=>{
+  selectedPlanCode=button.dataset.plan;
+  const profileChoice=button.dataset.profileChoice;
+  document.getElementById('profile').value=profileChoice;
+  syncProfileFields();
+  selectedPlanNotice.textContent='Plano escolhido: '+button.closest('.plan').querySelector('h3').textContent+' — '+button.closest('.plan').querySelector('.price').textContent.trim()+'. Agora preencha seu cadastro.';
+  selectedPlanNotice.style.display='block';
+  setMode('signup');
+  document.getElementById('registrationPanel').scrollIntoView({behavior:'smooth',block:'start'});
+}));
+document.querySelectorAll('[data-profile]').forEach(button=>button.addEventListener('click',()=>{
+  setMode('signup');
+  document.getElementById('profile').value=button.dataset.profile;
+  selectedPlanCode='';
+  syncProfileFields();
+  selectedPlanNotice.textContent=button.dataset.profile==='company'?'Cadastro de empresa parceira — não há cobrança mensal configurada para empresas neste momento.':'Escolha um plano acima antes de concluir seu cadastro.';
+  selectedPlanNotice.style.display='block';
+  document.getElementById('registrationPanel').scrollIntoView({behavior:'smooth',block:'start'});
+}));
 function setMode(next){mode=next;signupFields.classList.toggle('hidden',mode==='login');document.getElementById('consentWrap').classList.toggle('hidden',mode==='login');document.getElementById('consent').required=mode==='signup';document.getElementById('fullName').required=mode==='signup';document.getElementById('profile').required=mode==='signup';document.getElementById('city').required=mode==='signup';document.getElementById('neighborhood').required=mode==='signup'&&document.getElementById('profile').value!=='company';document.getElementById('whatsapp').required=mode==='signup';document.getElementById('companyName').required=false;document.getElementById('companyFields').classList.add('hidden');document.getElementById('password').autocomplete=mode==='login'?'current-password':'new-password';submitButton.textContent=mode==='login'?'Entrar':'Criar minha conta';signupTab.classList.toggle('active',mode==='signup');loginTab.classList.toggle('active',mode==='login');message.style.display='none'}
 signupTab.addEventListener('click',()=>setMode('signup'));loginTab.addEventListener('click',()=>setMode('login'));
 
@@ -84,7 +106,9 @@ const whatsapp=document.getElementById('whatsapp').value.trim();
 const service=document.getElementById('service').value.trim();
 const companyName=document.getElementById('companyName').value.trim();
 if(!document.getElementById('consent').checked) throw new Error('Marque a autorização para concluir seu cadastro.');
-const plan_code=profile==='client'?'client_monthly':(profile==='salon'?'salon_monthly':'professional_monthly');
+const plan_code=profile==='company'?'company_partnership':(selectedPlanCode || (profile==='client'?'client_monthly':(profile==='salon'?'salon_monthly':'professional_monthly')));
+if(profile!=='company'&&!selectedPlanCode) throw new Error('Escolha seu plano antes de criar a conta.');
+if(profile!=='company'&&((profile==='client'&&plan_code!=='client_monthly')||(profile==='professional'&&plan_code!=='professional_monthly')||(profile==='salon'&&plan_code!=='salon_monthly'))) throw new Error('O plano escolhido não corresponde ao perfil selecionado. Escolha novamente.');
 const metadata={
 full_name:fullName,profile_type:profile,
 company_name:profile==='company'?companyName:null,
@@ -134,8 +158,20 @@ if(result.data.session){form.reset();setMode('login');}
 }else{
 result=await supabase.auth.signInWithPassword({email,password});
 if(result.error) throw result.error;
-message.textContent='Login realizado. Você pode continuar para o pagamento do seu plano.';
-checkoutButton.style.display='block';
+const savedPlan=result.data.user?.user_metadata?.plan_code;
+if(savedPlan&&savedPlan!=='company_partnership'){
+  message.textContent='Login realizado. Preparando o pagamento do plano escolhido…';
+  message.className='message';message.style.display='block';
+  checkoutButton.style.display='block';
+  checkoutButton.disabled=true;
+  checkoutButton.textContent='Abrindo pagamento…';
+  const {data:checkoutData,error:checkoutError}=await supabase.functions.invoke('create-subscription',{body:{plan_code:savedPlan}});
+  if(checkoutError) throw checkoutError;
+  if(!checkoutData?.checkout_url) throw new Error(checkoutData?.error||'Não foi possível preparar o pagamento.');
+  location.href=checkoutData.checkout_url;
+}else{
+  message.textContent='Login realizado. Sua conta de empresa está pronta para continuidade do cadastro de parceria.';
+}
 }
 message.className='message';message.style.display='block';
 }catch(err){
