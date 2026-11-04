@@ -129,7 +129,7 @@ const service=document.getElementById('service').value.trim();
 const companyName=document.getElementById('companyName').value.trim();
 if(fullName.length<2||fullName.length>100) throw new Error('Informe seu nome completo (de 2 a 100 caracteres).');
 if(city.length<2||city.length>100) throw new Error('Informe uma cidade válida.');
-const whatsappDigits=whatsapp.replace(/\\D/g,'');
+const whatsappDigits=whatsapp.replace(/\D/g,'');
 if(whatsappDigits.length<10||whatsappDigits.length>15) throw new Error('Informe um WhatsApp com DDD e entre 10 e 15 números.');
 if(profile==='company'&&(companyName.length<2||companyName.length>150)) throw new Error('Informe o nome da empresa (de 2 a 150 caracteres).');
 if(!document.getElementById('consent').checked) throw new Error('Marque a autorização para concluir seu cadastro.');
