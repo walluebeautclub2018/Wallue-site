@@ -307,6 +307,7 @@ async function refreshSessionControls(){
   const {data:{user},error}=await supabase.auth.getUser();
   if(error){sessionControls.classList.add('hidden');return;}
   sessionControls.classList.toggle('hidden',!user);
+  sessionControls.style.display=user?'block':'none';
   if(user)sessionStatusText.textContent='Há uma conta conectada ('+user.email+'). Para criar outro cadastro, saia primeiro.';
 }
 document.getElementById('signOutButton').addEventListener('click',async()=>{
