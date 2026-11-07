@@ -317,7 +317,6 @@ document.getElementById('signOutButton').addEventListener('click',async()=>{
     if(error)throw error;
     memberHub.classList.add('hidden');
     document.getElementById('mediaPanel').classList.add('hidden');
-    document.getElementById('checkoutButton').style.display='none';
     document.getElementById('authForm').reset();
     setMode('signup');
     sessionControls.classList.add('hidden');
