@@ -107,6 +107,7 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 <section class="panel" id="registrationPanel">
 <div id="selectedPlanNotice" class="message" style="display:block;margin:0 0 16px">Primeiro, escolha seu plano acima. Depois, preencha o cadastro.</div>
 <div class="tabs"><button id="signupTab" class="active" type="button">Criar conta</button><button id="loginTab" type="button">Entrar</button></div>
+<div id="sessionControls" class="message hidden" role="status" style="margin:12px 0"><span id="sessionStatusText">Você já está conectada a uma conta.</span><button type="button" id="signOutButton" class="secondary" style="display:block;margin-top:10px">Sair da conta</button></div>
 <form id="authForm">
 <div id="signupFields">
 <label for="fullName">Nome completo</label><input id="fullName" autocomplete="name" required>
@@ -300,6 +301,36 @@ submitButton.textContent=mode==='login'?'Entrar':'Criar minha conta';
 
 // Áreas de profissionais e oportunidades, com permissões conferidas pelo perfil no banco.
 const memberHub=document.getElementById('memberHub');
+const sessionControls=document.getElementById('sessionControls');
+const sessionStatusText=document.getElementById('sessionStatusText');
+async function refreshSessionControls(){
+  const {data:{user},error}=await supabase.auth.getUser();
+  if(error){sessionControls.classList.add('hidden');return;}
+  sessionControls.classList.toggle('hidden',!user);
+  if(user)sessionStatusText.textContent='Há uma conta conectada ('+user.email+'). Para criar outro cadastro, saia primeiro.';
+}
+document.getElementById('signOutButton').addEventListener('click',async()=>{
+  const button=document.getElementById('signOutButton');
+  button.disabled=true;button.textContent='Saindo…';
+  try{
+    const {error}=await supabase.auth.signOut();
+    if(error)throw error;
+    memberHub.classList.add('hidden');
+    document.getElementById('mediaPanel').classList.add('hidden');
+    document.getElementById('checkoutButton').style.display='none';
+    document.getElementById('authForm').reset();
+    setMode('signup');
+    sessionControls.classList.add('hidden');
+    message.textContent='Você saiu da conta. Agora pode criar um novo cadastro ou entrar com outra conta.';
+    message.className='message';message.style.display='block';
+    document.getElementById('registrationPanel').scrollIntoView({behavior:'smooth',block:'start'});
+  }catch(err){
+    sessionStatusText.textContent='Não foi possível sair da conta: '+(err.message||'Tente novamente.');
+  }finally{
+    button.disabled=false;button.textContent='Sair da conta';
+  }
+});
+refreshSessionControls();
 let signedInProfile=null, signedInUser=null;
 function showFeatureMessage(id,text,isError=false){const el=document.getElementById(id);el.textContent=text;el.classList.remove('hidden');el.classList.toggle('error',isError);}
 function esc(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
