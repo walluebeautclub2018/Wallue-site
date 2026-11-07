@@ -109,7 +109,7 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 <label for="city">Cidade</label><input id="city" autocomplete="address-level2" placeholder="Ex.: Salvador" required>
 <label for="neighborhood">Bairro</label><input id="neighborhood" placeholder="Seu bairro" required>
 <label for="whatsapp">WhatsApp</label><input id="whatsapp" type="tel" autocomplete="tel" placeholder="(71) 99999-9999" required>
-<label for="instagramUrl">Instagram profissional ou comercial (opcional)</label><input id="instagramUrl" type="url" inputmode="url" placeholder="https://www.instagram.com/seuperfil/"><p class="fine">Informe o link do perfil público que representa seu trabalho ou empresa.</p>
+<div id="instagramField"><label for="instagramUrl">Instagram profissional ou comercial (opcional)</label><input id="instagramUrl" type="url" inputmode="url" placeholder="https://www.instagram.com/seuperfil/"><p class="fine">Informe o link do perfil público que representa seu trabalho ou empresa.</p></div>
 <label for="service" id="serviceLabel">Profissão, serviço ou interesse principal</label><select id="service"><option value="">Selecione uma opção</option><option>Manicure</option><option>Pedicure</option><option>Cabeleireiro(a)</option><option>Barbearia / Barbeiro(a)</option><option>Podologia</option><option>Estética</option><option>Bronzeamento</option><option>Depilação</option><option>Maquiagem</option><option>Design de sobrancelhas</option><option>Massoterapia</option><option>Tranças</option><option>Outro</option></select>
 </div>
 <label for="email">E-mail</label><input id="email" type="email" autocomplete="email" required>
@@ -161,7 +161,7 @@ const signupTab=document.getElementById('signupTab'),loginTab=document.getElemen
 const submitButton=document.getElementById('submitButton'),message=document.getElementById('message');
 const checkoutButton=document.createElement('button');checkoutButton.type='button';checkoutButton.className='primary';checkoutButton.textContent='Continuar para pagamento';checkoutButton.style.display='none';form.appendChild(checkoutButton);
 let mode='signup';
-function syncProfileFields(){const isCompany=document.getElementById('profile').value==='company';document.getElementById('companyFields').classList.toggle('hidden',!isCompany);document.getElementById('companyName').required=isCompany;document.getElementById('neighborhood').required=!isCompany;const service=document.getElementById('service');const label=document.getElementById('serviceLabel');const options=isCompany?['Serviços gerais','Diarista','Recepcionista','Motorista','Outro']:['Manicure','Pedicure','Cabeleireiro(a)','Barbearia / Barbeiro(a)','Podologia','Estética','Bronzeamento','Depilação','Maquiagem','Design de sobrancelhas','Massoterapia','Tranças','Outro'];const previous=service.value;label.textContent=isCompany?'Profissão ou serviço que sua empresa procura':'Profissão, serviço ou interesse principal';service.replaceChildren(new Option('Selecione uma opção',''),...options.map(value=>new Option(value,value)));service.value=options.includes(previous)?previous:'';service.required=isCompany;}
+function syncProfileFields(){const selectedProfile=document.getElementById('profile').value;const isCompany=selectedProfile==='company';document.getElementById('instagramField').classList.toggle('hidden',selectedProfile==='client');document.getElementById('companyFields').classList.toggle('hidden',!isCompany);document.getElementById('companyName').required=isCompany;document.getElementById('neighborhood').required=!isCompany;const service=document.getElementById('service');const label=document.getElementById('serviceLabel');const options=isCompany?['Serviços gerais','Diarista','Recepcionista','Motorista','Outro']:['Manicure','Pedicure','Cabeleireiro(a)','Barbearia / Barbeiro(a)','Podologia','Estética','Bronzeamento','Depilação','Maquiagem','Design de sobrancelhas','Massoterapia','Tranças','Outro'];const previous=service.value;label.textContent=isCompany?'Profissão ou serviço que sua empresa procura':'Profissão, serviço ou interesse principal';service.replaceChildren(new Option('Selecione uma opção',''),...options.map(value=>new Option(value,value)));service.value=options.includes(previous)?previous:'';service.required=isCompany;}
 document.getElementById('profile').addEventListener('change',syncProfileFields);
 let selectedPlanCode='';
 const selectedPlanNotice=document.getElementById('selectedPlanNotice');
@@ -204,6 +204,8 @@ const profile=document.getElementById('profile').value;
 const fullName=document.getElementById('fullName').value.trim();
 const city=document.getElementById('city').value.trim();
 const whatsapp=document.getElementById('whatsapp').value.trim();
+const instagramUrl=document.getElementById('instagramUrl').value.trim();
+if(instagramUrl){let parsed;try{parsed=new URL(instagramUrl);}catch{throw new Error('Informe um link válido do Instagram.');}if(!['instagram.com','www.instagram.com'].includes(parsed.hostname.toLowerCase()))throw new Error('Informe um endereço do Instagram (instagram.com).');}
 const service=document.getElementById('service').value.trim();
 const companyName=document.getElementById('companyName').value.trim();
 if(fullName.length<2||fullName.length>100) throw new Error('Informe seu nome completo (de 2 a 100 caracteres).');
@@ -219,7 +221,7 @@ const metadata={
 full_name:fullName,profile_type:profile,
 company_name:profile==='company'?companyName:null,
 city,neighborhood:profile==='company'?'':document.getElementById('neighborhood').value.trim(),
-whatsapp,service_interest:service,instagram_url:document.getElementById('instagramUrl').value.trim(),
+whatsapp,service_interest:service,instagram_url:profile==='client'?null:instagramUrl,
 planned_monthly_price_cents:profile==='client'?399:(profile==='company'?null:1699),
 plan_code:profile==='company'?'company_partnership':plan_code,
 referral_fee_cents:profile==='professional'||profile==='salon'?99:null,
