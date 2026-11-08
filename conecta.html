@@ -110,7 +110,7 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 <div id="sessionControls" class="message hidden" role="status" style="margin:12px 0"><span id="sessionStatusText">Você já está conectada a uma conta.</span><button type="button" id="signOutButton" class="secondary" style="display:block;margin-top:10px">Sair da conta</button></div>
 <form id="authForm">
 <div id="signupFields">
-<label for="fullName">Nome completo</label><input id="fullName" autocomplete="name" required>
+<label for="fullName">Nome completo</label><input id="fullName" autocomplete="name" required><div id="signupPhotoWrap"><label for="signupPhoto">Foto de perfil</label><input id="signupPhoto" type="file" accept="image/jpeg,image/png,image/webp"><p class="fine">Obrigatória para profissionais, salões e empresas. JPEG, PNG ou WebP, até 5 MB. A foto será enviada com segurança após a confirmação do e-mail e o primeiro login.</p><img id="signupPhotoPreview" class="hidden" alt="Prévia da foto de perfil" style="width:100px;height:100px;object-fit:cover;border-radius:50%;margin-top:8px"></div>
 <label for="profile">Quero me cadastrar como</label><select id="profile" required><option value="professional">Profissional autônomo</option><option value="salon">Proprietário de salão</option><option value="client">Cliente</option><option value="company">Empresa parceira</option></select><div id="companyFields" class="hidden"><label for="companyName">Nome da empresa</label><input id="companyName" autocomplete="organization" placeholder="Razão social ou nome fantasia"></div>
 <label for="city">Cidade</label><input id="city" autocomplete="address-level2" placeholder="Ex.: Salvador" required>
 <label for="neighborhood">Bairro</label><input id="neighborhood" placeholder="Seu bairro" required>
@@ -166,6 +166,14 @@ const form=document.getElementById('authForm'), signupFields=document.getElement
 const signupTab=document.getElementById('signupTab'),loginTab=document.getElementById('loginTab');
 const submitButton=document.getElementById('submitButton'),message=document.getElementById('message');
 const checkoutButton=document.createElement('button');checkoutButton.type='button';checkoutButton.className='primary';checkoutButton.textContent='Continuar para pagamento';checkoutButton.style.display='none';form.appendChild(checkoutButton);
+function openWallueDraftDB(){return new Promise((ok,no)=>{const r=indexedDB.open('wallue-conecta-drafts',1);r.onupgradeneeded=()=>r.result.createObjectStore('photos');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error);});}
+async function savePendingProfilePhoto(email,file){const d=await openWallueDraftDB();await new Promise((ok,no)=>{const t=d.transaction('photos','readwrite');t.objectStore('photos').put({file},email.toLowerCase());t.oncomplete=ok;t.onerror=()=>no(t.error);});d.close();}
+async function takePendingProfilePhoto(email){const d=await openWallueDraftDB();const v=await new Promise((ok,no)=>{const t=d.transaction('photos','readonly'),r=t.objectStore('photos').get(email.toLowerCase());r.onsuccess=()=>ok(r.result||null);r.onerror=()=>no(r.error);});d.close();return v;}
+async function clearPendingProfilePhoto(email){const d=await openWallueDraftDB();await new Promise((ok,no)=>{const t=d.transaction('photos','readwrite');t.objectStore('photos').delete(email.toLowerCase());t.oncomplete=ok;t.onerror=()=>no(t.error);});d.close();}
+async function uploadWallueMedia(user,file,kind,caption){if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>5*1024*1024)throw new Error('A imagem deve ser JPEG, PNG ou WebP e ter até 5 MB.');const ext=file.type==='image/jpeg'?'jpg':file.type==='image/png'?'png':'webp',path=user.id+'/'+kind+'/'+crypto.randomUUID()+'.'+ext;const {error:u}=await supabase.storage.from('wallue-public-media').upload(path,file,{cacheControl:'31536000',contentType:file.type,upsert:false});if(u)throw u;const {error:i}=await supabase.from('wallue_profile_media').insert({user_id:user.id,media_kind:kind,object_path:path,mime_type:file.type,file_size_bytes:file.size,caption:caption||null,is_public:true});if(i){await supabase.storage.from('wallue-public-media').remove([path]);throw i;}}
+async function uploadPendingProfilePhoto(user){try{const draft=await takePendingProfilePhoto(user.email||'');if(draft?.file){await uploadWallueMedia(user,draft.file,'profile','Foto de perfil');await clearPendingProfilePhoto(user.email||'');}}catch(e){console.warn('A foto poderá ser enviada pela área Meu Espaço:',e);}}
+document.getElementById('signupPhoto').addEventListener('change',e=>{const f=e.target.files[0],p=document.getElementById('signupPhotoPreview');if(!f){p.classList.add('hidden');return;}if(!['image/jpeg','image/png','image/webp'].includes(f.type)||f.size>5*1024*1024){e.target.value='';p.classList.add('hidden');message.textContent='Escolha JPEG, PNG ou WebP de até 5 MB.';message.className='message error';message.style.display='block';return;}p.src=URL.createObjectURL(f);p.classList.remove('hidden');});
+
 let mode='signup';
 let requestedHubTarget='auto';
 function syncProfileFields(){const selectedProfile=document.getElementById('profile').value;const isCompany=selectedProfile==='company';document.getElementById('instagramField').classList.toggle('hidden',selectedProfile==='client');document.getElementById('companyFields').classList.toggle('hidden',!isCompany);document.getElementById('companyName').required=isCompany;document.getElementById('neighborhood').required=!isCompany;const service=document.getElementById('service');const label=document.getElementById('serviceLabel');const options=isCompany?['Serviços gerais','Diarista','Recepcionista','Motorista','Outro']:['Manicure','Pedicure','Cabeleireiro(a)','Barbearia / Barbeiro(a)','Podologia','Estética','Bronzeamento','Depilação','Maquiagem','Design de sobrancelhas','Massoterapia','Tranças','Outro'];const previous=service.value;label.textContent=isCompany?'Profissão ou serviço que sua empresa procura':'Profissão, serviço ou interesse principal';service.replaceChildren(new Option('Selecione uma opção',''),...options.map(value=>new Option(value,value)));service.value=options.includes(previous)?previous:'';service.required=isCompany;}
@@ -221,6 +229,7 @@ const whatsappDigits=whatsapp.replace(/\D/g,'');
 if(whatsappDigits.length<10||whatsappDigits.length>15) throw new Error('Informe um WhatsApp com DDD e entre 10 e 15 números.');
 if(profile==='company'&&(companyName.length<2||companyName.length>150)) throw new Error('Informe o nome da empresa (de 2 a 150 caracteres).');
 if(!document.getElementById('consent').checked) throw new Error('Marque a autorização para concluir seu cadastro.');
+const signupPhoto=document.getElementById('signupPhoto').files[0];if(['professional','salon','company'].includes(profile)&&!signupPhoto)throw new Error('Adicione uma foto de perfil para concluir este cadastro.');if(signupPhoto&&(!['image/jpeg','image/png','image/webp'].includes(signupPhoto.type)||signupPhoto.size>5*1024*1024))throw new Error('A foto deve ser JPEG, PNG ou WebP e ter até 5 MB.');
 const plan_code=profile==='company'?'company_partnership':(selectedPlanCode || (profile==='client'?'client_monthly':(profile==='salon'?'salon_monthly':'professional_monthly')));
 if(profile!=='company'&&!selectedPlanCode) throw new Error('Escolha seu plano antes de criar a conta.');
 if(profile!=='company'&&((profile==='client'&&plan_code!=='client_monthly')||(profile==='professional'&&plan_code!=='professional_monthly')||(profile==='salon'&&plan_code!=='salon_monthly'))) throw new Error('O plano escolhido não corresponde ao perfil selecionado. Escolha novamente.');
@@ -234,7 +243,7 @@ plan_code:profile==='company'?'company_partnership':plan_code,
 referral_fee_cents:profile==='professional'||profile==='salon'?99:null,
 consent_to_data_processing:true
 };
-result=await supabase.auth.signUp({email,password,options:{emailRedirectTo:location.href.split('?')[0],data:metadata}});
+if(signupPhoto)await savePendingProfilePhoto(email,signupPhoto);result=await supabase.auth.signUp({email,password,options:{emailRedirectTo:location.href.split('?')[0],data:metadata}});
 if(result.error) throw result.error;
 let insertError=null;
 if(profile==='company'){
@@ -280,9 +289,9 @@ if(savedPlan&&savedPlan!=='company_partnership'){
   checkoutButton.style.display='block';
   checkoutButton.disabled=false;
   checkoutButton.textContent='Continuar para pagamento';
-  if(['professional','salon'].includes(result.data.user?.user_metadata?.profile_type)){
+  if(['professional','salon','company'].includes(result.data.user?.user_metadata?.profile_type)){
     document.getElementById('mediaPanel').classList.remove('hidden');
-    await loadMyMedia();
+    await uploadPendingProfilePhoto(result.data.user);await loadMyMedia();
   }
 }else{
   message.textContent='Login realizado. Sua conta está pronta para continuar usando a Wallue Conecta.';
@@ -370,13 +379,7 @@ document.getElementById('uploadMediaButton').addEventListener('click',async()=>{
     const file=document.getElementById('mediaFile').files[0];if(!file)throw new Error('Escolha uma imagem primeiro.');
     if(!['image/jpeg','image/png','image/webp'].includes(file.type))throw new Error('Use JPEG, PNG ou WebP.');
     if(file.size>5*1024*1024)throw new Error('A imagem ultrapassa o limite de 5 MB.');
-    const kind=document.getElementById('mediaKind').value;
-    const ext=file.type==='image/jpeg'?'jpg':(file.type==='image/png'?'png':'webp');
-    const path=user.id+'/'+kind+'/'+crypto.randomUUID()+'.'+ext;
-    const {error:up}=await supabase.storage.from('wallue-public-media').upload(path,file,{cacheControl:'31536000',contentType:file.type,upsert:false});
-    if(up)throw up;
-    const {error:ins}=await supabase.from('wallue_profile_media').insert({user_id:user.id,media_kind:kind,object_path:path,mime_type:file.type,file_size_bytes:file.size,caption:document.getElementById('mediaCaption').value.trim()||null,is_public:true});
-    if(ins){await supabase.storage.from('wallue-public-media').remove([path]);throw ins;}
+    const kind=document.getElementById('mediaKind').value;await uploadWallueMedia(user,file,kind,document.getElementById('mediaCaption').value.trim());
     document.getElementById('mediaFile').value='';document.getElementById('mediaCaption').value='';
     mediaMessage.textContent='Imagem enviada e registrada com sucesso.';mediaMessage.className='message';mediaMessage.style.display='block';await loadMyMedia();
   }catch(err){mediaMessage.textContent=err.message||'Não foi possível enviar a imagem.';mediaMessage.className='message error';mediaMessage.style.display='block';}
