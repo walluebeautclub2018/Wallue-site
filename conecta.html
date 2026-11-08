@@ -150,7 +150,7 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 </div><p class="fine" style="text-align:center">O acesso às funções de publicação e manifestação de interesse exige uma conta confirmada e login.</p>
 </section>
 <section class="panel hidden" id="memberHub">
-<h2 style="color:var(--purple);margin-top:0">Minha área Wallue Conecta</h2><p id="memberWelcome" class="fine"></p>
+<h2 style="color:var(--purple);margin-top:0">Minha área Wallue Conecta</h2><p id="memberWelcome" class="fine"></p><div style="display:flex;justify-content:flex-end;margin:8px 0 16px"><button type="button" id="memberSignOutButton" style="border:1px solid #d9cddd;border-radius:22px;background:#f1e6d8;color:#32104f;padding:10px 16px;font-weight:700">Sair da conta</button></div>
 <div id="memberDirectory" class="hidden feature-panel"><h3>Encontrar profissionais</h3><p class="fine">Consulte profissionais cadastrados. Os dados de contato privados não são exibidos publicamente.</p><div class="feature-form"><div><label for="directoryCity">Cidade</label><input id="directoryCity" placeholder="Filtrar por cidade"></div><div><label for="directoryService">Serviço ou profissão</label><input id="directoryService" placeholder="Ex.: manicure, motorista"></div></div><div class="feature-actions"><button type="button" id="searchDirectory">Pesquisar</button></div><div id="directoryResults" class="feature-list" style="margin-top:14px"></div><div id="directoryMessage" class="feature-message hidden"></div></div>
 <div id="memberOpportunities" class="hidden feature-panel"><h3>Mural de oportunidades</h3><p class="fine">Consulte vagas, serviços procurados, serviços oferecidos e parcerias.</p><div id="opportunityComposer" class="hidden"><h4 style="color:var(--purple)">Publicar oportunidade</h4><div class="feature-form"><div><label for="oppTitle">Título</label><input id="oppTitle" maxlength="120" placeholder="Ex.: Motorista para empresa"></div><div><label for="oppType">Tipo</label><select id="oppType"><option value="vaga">Vaga / oportunidade de trabalho</option><option value="servico_procurado">Serviço procurado</option><option value="servico_oferecido">Serviço oferecido</option><option value="parceria">Parceria</option></select></div><div><label for="oppCategory">Categoria</label><input id="oppCategory" maxlength="100" placeholder="Ex.: Serviços gerais"></div><div><label for="oppCity">Cidade</label><input id="oppCity" maxlength="100" placeholder="Cidade"></div><div><label for="oppNeighborhood">Bairro (opcional)</label><input id="oppNeighborhood" maxlength="100" placeholder="Bairro"></div><div class="wide"><label for="oppDescription">Descrição</label><textarea id="oppDescription" maxlength="2000" placeholder="Descreva a atividade, requisitos e condições. Não inclua dados pessoais sensíveis."></textarea></div></div><label style="display:flex;gap:8px;align-items:flex-start;font-weight:400"><input id="oppConsent" type="checkbox" style="width:auto;margin-top:4px"><span>Autorizo a publicação destas informações na Wallue Conecta.</span></label><div class="feature-actions"><button type="button" id="publishOpportunity">Publicar oportunidade</button></div><div id="publishMessage" class="feature-message hidden"></div><hr style="border:0;border-top:1px solid #eadfcf;margin:20px 0"></div><div id="opportunityResults" class="feature-list"></div><div id="opportunityMessage" class="feature-message hidden"></div></div>
 <div id="memberInterests" class="hidden feature-panel"><h3>Minhas manifestações de interesse</h3><div id="interestResults" class="feature-list"></div></div><div id="memberReceived" class="hidden feature-panel"><h3>Interesses recebidos nas minhas publicações</h3><div id="receivedResults" class="feature-list"></div></div>
@@ -287,6 +287,7 @@ if(savedPlan&&savedPlan!=='company_partnership'){
   message.textContent='Login realizado. Sua conta está pronta para continuar usando a Wallue Conecta.';
 }
 await openMemberAreas(result.data.user);
+await refreshSessionControls();
 }
 message.className='message';message.style.display='block';
 }catch(err){
@@ -310,8 +311,7 @@ async function refreshSessionControls(){
   sessionControls.style.display=user?'block':'none';
   if(user)sessionStatusText.textContent='Há uma conta conectada ('+user.email+'). Para criar outro cadastro, saia primeiro.';
 }
-document.getElementById('signOutButton').addEventListener('click',async()=>{
-  const button=document.getElementById('signOutButton');
+async function performSignOut(button){
   button.disabled=true;button.textContent='Saindo…';
   try{
     const {error}=await supabase.auth.signOut();
@@ -321,6 +321,7 @@ document.getElementById('signOutButton').addEventListener('click',async()=>{
     document.getElementById('authForm').reset();
     setMode('signup');
     sessionControls.classList.add('hidden');
+    sessionControls.style.display='none';
     message.textContent='Você saiu da conta. Agora pode criar um novo cadastro ou entrar com outra conta.';
     message.className='message';message.style.display='block';
     document.getElementById('registrationPanel').scrollIntoView({behavior:'smooth',block:'start'});
@@ -329,7 +330,9 @@ document.getElementById('signOutButton').addEventListener('click',async()=>{
   }finally{
     button.disabled=false;button.textContent='Sair da conta';
   }
-});
+}
+document.getElementById('signOutButton').addEventListener('click',()=>performSignOut(document.getElementById('signOutButton')));
+document.getElementById('memberSignOutButton').addEventListener('click',()=>performSignOut(document.getElementById('memberSignOutButton')));
 refreshSessionControls();
 let signedInProfile=null, signedInUser=null;
 function showFeatureMessage(id,text,isError=false){const el=document.getElementById(id);el.textContent=text;el.classList.remove('hidden');el.classList.toggle('error',isError);}
