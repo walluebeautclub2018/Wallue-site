@@ -90,12 +90,12 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 </div>
 <p class="convenience-note">Atendimentos fora do estabelecimento dependem da disponibilidade do profissional. Se houver taxa de deslocamento, ela deverá ser informada e aceita previamente. A Wallue Conecta facilita a conexão; as partes confirmam local, preço e condições antes de fechar o serviço.</p>
 </section>
-<section class="grid" id="planSelection" aria-label="Escolha seu plano">
-<article class="plan"><h3>Profissional autônomo</h3><div class="price">R$ 16,99 <small>/ mês</small></div><p>Para profissionais que desejam divulgar seus serviços e conquistar clientes.</p><button class="primary" type="button" data-plan="professional_monthly" data-profile-choice="professional">Escolher este plano</button></article>
-<article class="plan"><h3>Salão de beleza</h3><div class="price">R$ 16,99 <small>/ mês</small></div><p>Para proprietários de salões que desejam ampliar suas oportunidades.</p><button class="primary" type="button" data-plan="salon_monthly" data-profile-choice="salon">Escolher este plano</button></article>
-<article class="plan"><h3>Cliente</h3><div class="price">R$ 3,99 <small>/ mês</small></div><p>Para encontrar profissionais e serviços de beleza.</p><p><strong>Promoção:</strong> primeiro mês gratuito para os primeiros 100 clientes elegíveis.</p><button class="primary" type="button" data-plan="client_monthly" data-profile-choice="client">Escolher este plano</button></article>
+<section id="planSelection" aria-label="Planos por modalidade">
+<div class="panel" style="margin:0 auto 18px;max-width:980px;text-align:center"><h2 style="color:var(--purple);margin:0 0 8px">Escolha sua modalidade</h2><p class="fine">Veja somente a opção relacionada ao seu perfil. O cadastro será aberto depois da sua escolha.</p><button class="secondary" id="openLoginButton" type="button">Já tenho conta — Entrar</button></div>
+<div class="panel" style="max-width:980px;margin:0 auto 16px"><h2 style="color:var(--purple);margin:0 0 12px">Para clientes</h2><div class="grid" style="margin:0"><article class="plan"><h3>Plano Cliente</h3><div class="price">R$ 3,99 <small>/ mês</small></div><p>Para encontrar profissionais e serviços de beleza.</p><p><strong>Promoção:</strong> primeiro mês gratuito para os primeiros 100 clientes elegíveis.</p><button class="primary" type="button" data-plan="client_monthly" data-profile-choice="client">Quero este plano</button></article></div></div>
+<div class="panel" style="max-width:980px;margin:0 auto 16px"><h2 style="color:var(--purple);margin:0 0 12px">Para profissionais e salões</h2><div class="grid" style="margin:0"><article class="plan"><h3>Profissional autônomo</h3><div class="price">R$ 16,99 <small>/ mês</small></div><p>Para profissionais que desejam divulgar seus serviços e conquistar clientes.</p><button class="primary" type="button" data-plan="professional_monthly" data-profile-choice="professional">Quero este plano</button></article><article class="plan"><h3>Salão de beleza</h3><div class="price">R$ 16,99 <small>/ mês</small></div><p>Para proprietários de salões que desejam ampliar suas oportunidades.</p><button class="primary" type="button" data-plan="salon_monthly" data-profile-choice="salon">Quero este plano</button></article></div></div>
+<div class="panel" style="max-width:980px;margin:0 auto 18px"><h2 style="color:var(--purple);margin:0 0 8px">Para empresas</h2><p>Cadastre sua empresa para apresentar necessidades, oportunidades e propostas de parceria. Não há mensalidade empresarial configurada nesta etapa.</p><button class="primary" id="companyPartnershipButton" type="button">Tenho interesse em parceria</button></div>
 </section>
-<p class="fine" style="text-align:center">Empresas interessadas em parceria podem iniciar o cadastro pelo card Empresas, sem contratação de mensalidade nesta etapa.</p>
 <section class="panel" style="margin:0 auto 24px;max-width:980px">
 <h2 style="color:var(--purple);margin-top:0">Encaminhamentos transparentes</h2>
 <p>O cliente não paga taxa por encaminhamento. Para o profissional, há duas opções: <strong>R$ 0,99 por encaminhamento válido</strong> ou o <strong>Pacote Promocional de Encaminhamentos por R$ 16,99/mês</strong>, com encaminhamentos ilimitados durante o mês contratado e sem cobrança individual adicional por contato. O encaminhamento avulso só é cobrado quando o cliente solicita o contato, autoriza o compartilhamento e o contato é efetivamente entregue. Busca e visualização de perfil não geram cobrança.</p>
@@ -103,8 +103,8 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 <button class="primary" id="referralPackageButton" type="button" disabled aria-disabled="true">Contratação em preparação — indisponível no momento</button>
 <p class="fine">Este é um benefício opcional adicional, exclusivo para profissionais e salões cadastrados. Primeiro, conclua seu cadastro e acesse sua conta. A contratação será liberada quando a integração de cobrança estiver ativada e testada. Nenhum pagamento será iniciado por este botão nesta etapa.</p>
 </section>
-<section class="panel" id="registrationPanel">
-<div id="selectedPlanNotice" class="message" style="display:block;margin:0 0 16px">Primeiro, escolha seu plano acima. Depois, preencha o cadastro.</div>
+<section class="panel hidden" id="registrationPanel" aria-label="Cadastro ou entrada">
+<div id="selectedPlanNotice" class="message" style="display:block;margin:0 0 16px">Escolha uma modalidade ou entre na sua conta.</div>
 <div class="tabs"><button id="signupTab" class="active" type="button">Criar conta</button><button id="loginTab" type="button">Entrar</button></div>
 <div id="sessionControls" class="message hidden" role="status" style="margin:12px 0"><span id="sessionStatusText">Você já está conectada a uma conta.</span><button type="button" id="signOutButton" class="secondary" style="display:block;margin-top:10px">Sair da conta</button></div>
 <form id="authForm">
@@ -180,24 +180,35 @@ document.getElementById('profile').addEventListener('change',syncProfileFields);
 let selectedPlanCode='';
 const selectedPlanNotice=document.getElementById('selectedPlanNotice');
 document.querySelectorAll('[data-plan]').forEach(button=>button.addEventListener('click',()=>{
-  selectedPlanCode=button.dataset.plan;
   const profileChoice=button.dataset.profileChoice;
-  document.getElementById('profile').value=profileChoice;
-  syncProfileFields();
-  selectedPlanNotice.textContent='Plano escolhido: '+button.closest('.plan').querySelector('h3').textContent+' — '+button.closest('.plan').querySelector('.price').textContent.trim()+'. Agora preencha seu cadastro.';
-  selectedPlanNotice.style.display='block';
-  setMode('signup');
-  document.getElementById('registrationPanel').scrollIntoView({behavior:'smooth',block:'start'});
+  const planName=button.closest('.plan').querySelector('h3').textContent;
+  const price=button.closest('.plan').querySelector('.price').textContent.trim();
+  openSignup(profileChoice,button.dataset.plan,'Plano escolhido: '+planName+' — '+price+'. Agora conclua seu cadastro.');
 }));
 document.querySelectorAll('[data-profile]').forEach(button=>button.addEventListener('click',()=>{
-  setMode('signup');
-  document.getElementById('profile').value=button.dataset.profile;
-  selectedPlanCode='';
-  syncProfileFields();
-  selectedPlanNotice.textContent=button.dataset.profile==='company'?'Cadastro de empresa parceira — não há cobrança mensal configurada para empresas neste momento.':'Escolha um plano acima antes de concluir seu cadastro.';
-  selectedPlanNotice.style.display='block';
-  document.getElementById('registrationPanel').scrollIntoView({behavior:'smooth',block:'start'});
+  document.getElementById('planSelection').scrollIntoView({behavior:'smooth',block:'start'});
+  const target=button.dataset.profile;
+  const heading=target==='client'?'Para clientes':(target==='company'?'Para empresas':'Para profissionais e salões');
+  document.querySelectorAll('#planSelection .panel').forEach(panel=>{panel.style.outline='none';if(panel.querySelector('h2')?.textContent===heading){panel.style.outline='2px solid var(--gold)';}});
 }));
+function openSignup(profile,planCode,notice){
+  selectedPlanCode=planCode||'';
+  document.getElementById('profile').value=profile;
+  syncProfileFields();
+  setMode('signup');
+  selectedPlanNotice.textContent=notice;
+  selectedPlanNotice.style.display='block';
+  document.getElementById('registrationPanel').classList.remove('hidden');
+  document.getElementById('registrationPanel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+document.getElementById('companyPartnershipButton').addEventListener('click',()=>openSignup('company','company_partnership','Cadastro de interesse em parceria empresarial. Preencha os dados para iniciar o contato com a Wallue Conecta.'));
+document.getElementById('openLoginButton').addEventListener('click',()=>{
+  selectedPlanCode='';
+  document.getElementById('registrationPanel').classList.remove('hidden');
+  setMode('login');
+  selectedPlanNotice.textContent='Entre com o e-mail e a senha da sua conta.';
+  document.getElementById('registrationPanel').scrollIntoView({behavior:'smooth',block:'start'});
+});
 function setMode(next){mode=next;signupFields.classList.toggle('hidden',mode==='login');document.getElementById('consentWrap').classList.toggle('hidden',mode==='login');document.getElementById('consent').required=mode==='signup';document.getElementById('fullName').required=mode==='signup';document.getElementById('profile').required=mode==='signup';document.getElementById('city').required=mode==='signup';document.getElementById('whatsapp').required=mode==='signup';syncProfileFields();document.getElementById('companyName').required=mode==='signup'&&document.getElementById('profile').value==='company';document.getElementById('neighborhood').required=mode==='signup'&&document.getElementById('profile').value!=='company';document.getElementById('password').autocomplete=mode==='login'?'current-password':'new-password';submitButton.textContent=mode==='login'?'Entrar':'Criar minha conta';signupTab.classList.toggle('active',mode==='signup');loginTab.classList.toggle('active',mode==='login');message.style.display='none'}
 signupTab.addEventListener('click',()=>setMode('signup'));loginTab.addEventListener('click',()=>setMode('login'));
 
