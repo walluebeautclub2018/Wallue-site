@@ -246,6 +246,9 @@ function openSignup(profile,planCode,notice){
 document.getElementById('openLoginButton').addEventListener('click',()=>{
   selectedPlanCode='';
   document.getElementById('registrationPanel').classList.remove('hidden');
+  document.getElementById('authForm').classList.remove('hidden');
+  document.getElementById('preCheckoutPanel').classList.add('hidden');
+  document.getElementById('signupFields').classList.add('hidden');
   setMode('login');
   selectedPlanNotice.textContent='Entre com o e-mail e a senha da sua conta.';
   document.getElementById('registrationPanel').scrollIntoView({behavior:'smooth',block:'start'});
