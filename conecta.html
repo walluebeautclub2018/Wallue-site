@@ -90,6 +90,13 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 <div id="selectedPlanNotice" class="message" style="display:block;margin:0 0 16px">Escolha uma modalidade ou entre na sua conta.</div>
 <div class="tabs"><button id="signupTab" class="active" type="button">Criar conta</button><button id="loginTab" type="button">Entrar</button></div>
 <div id="sessionControls" class="message hidden" role="status" style="margin:12px 0"><span id="sessionStatusText">Você já está conectada a uma conta.</span><button type="button" id="signOutButton" class="secondary" style="display:block;margin-top:10px">Sair da conta</button></div>
+<div id="preCheckoutPanel" class="panel" style="margin:0 0 16px">
+<label for="checkoutEmail">E-mail para receber a confirmação do pagamento</label>
+<input id="checkoutEmail" type="email" autocomplete="email" placeholder="seuemail@exemplo.com">
+<button type="button" class="primary" id="startCheckoutButton">Ir para pagamento seguro</button>
+<p class="fine">Primeiro você escolhe o plano e paga. O formulário completo de cadastro será liberado somente após a confirmação do Mercado Pago.</p>
+</div>
+<div id="paidCheckoutNotice" class="message hidden" role="status"></div>
 <form id="authForm">
 <div id="signupFields">
 <label for="fullName">Nome completo</label><input id="fullName" autocomplete="name" required><div id="signupPhotoWrap"><label for="signupPhoto">Foto de perfil</label><input id="signupPhoto" type="file" accept="image/jpeg,image/png,image/webp"><p class="fine">Obrigatória para profissionais, salões e empresas. JPEG, PNG ou WebP, até 5 MB. A foto será enviada com segurança após a confirmação do e-mail e o primeiro login.</p><img id="signupPhotoPreview" class="hidden" alt="Prévia da foto de perfil" style="width:100px;height:100px;object-fit:cover;border-radius:50%;margin-top:8px"></div>
@@ -153,6 +160,51 @@ const supabase=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 const form=document.getElementById('authForm'), signupFields=document.getElementById('signupFields');
 const signupTab=document.getElementById('signupTab'),loginTab=document.getElementById('loginTab');
 const submitButton=document.getElementById('submitButton'),message=document.getElementById('message');
+let approvedCheckoutToken='';
+const preCheckoutPanel=document.getElementById('preCheckoutPanel');
+const paidCheckoutNotice=document.getElementById('paidCheckoutNotice');
+document.getElementById('signupFields').classList.add('hidden');
+document.getElementById('consentWrap').classList.add('hidden');
+document.getElementById('startCheckoutButton').addEventListener('click',async()=>{
+ const email=document.getElementById('checkoutEmail').value.trim().toLowerCase();
+ if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)){showPreCheckoutMessage('Informe um e-mail válido antes de continuar.',true);return;}
+ if(!selectedPlanCode){showPreCheckoutMessage('Escolha primeiro uma modalidade e um plano.',true);return;}
+ const btn=document.getElementById('startCheckoutButton');btn.disabled=true;btn.textContent='Preparando pagamento…';
+ try{
+  const {data,error}=await supabase.functions.invoke('create-pending-checkout',{body:{plan_code:selectedPlanCode,email}});
+  if(error)throw error;
+  if(!data?.checkout_url)throw new Error(data?.error||'Não foi possível iniciar o pagamento.');
+  location.href=data.checkout_url;
+ }catch(e){showPreCheckoutMessage(e.message||'Não foi possível iniciar o pagamento.');}
+ finally{btn.disabled=false;btn.textContent='Ir para pagamento seguro';}
+});
+function showPreCheckoutMessage(text,isError=false){paidCheckoutNotice.textContent=text;paidCheckoutNotice.classList.remove('hidden');paidCheckoutNotice.classList.toggle('error',isError);}
+async function checkReturnedCheckout(){
+ const params=new URLSearchParams(location.search);const token=params.get('checkout_token');
+ if(!token)return;
+ document.getElementById('registrationPanel').classList.remove('hidden');
+ selectedPlanNotice.textContent='Verificando a confirmação do Mercado Pago…';
+ preCheckoutPanel.classList.add('hidden');
+ try{
+  const {data,error}=await supabase.functions.invoke('verify-pending-checkout',{body:{token}});
+  if(error)throw error;
+  if(!data?.paid){showPreCheckoutMessage('O Mercado Pago ainda não confirmou a assinatura. O cadastro permanece bloqueado. Aguarde a confirmação e atualize esta página.',true);preCheckoutPanel.classList.remove('hidden');return;}
+  approvedCheckoutToken=token;
+  selectedPlanCode=data.plan_code;
+  document.getElementById('profile').value=({client_monthly:'client',professional_monthly:'professional',salon_monthly:'salon',company_monthly:'company'})[data.plan_code]||'';
+  syncProfileFields();
+  document.getElementById('email').value=data.email;
+  document.getElementById('email').readOnly=true;
+  document.getElementById('signupFields').classList.remove('hidden');
+  document.getElementById('consentWrap').classList.remove('hidden');
+  document.getElementById('authForm').classList.remove('hidden');
+  document.getElementById('preCheckoutPanel').classList.add('hidden');
+  showPreCheckoutMessage('Pagamento confirmado! Agora preencha seus dados para concluir o cadastro.');
+  setMode('signup');
+  history.replaceState({},'',location.pathname);
+ }catch(e){showPreCheckoutMessage('Não foi possível validar o pagamento. O cadastro continua bloqueado. '+(e.message||''),true);}
+}
+function showPreCheckoutMessage(text,isError=false){paidCheckoutNotice.textContent=text;paidCheckoutNotice.classList.remove('hidden');paidCheckoutNotice.classList.toggle('error',isError);}
 const checkoutButton=document.createElement('button');checkoutButton.type='button';checkoutButton.className='primary';checkoutButton.textContent='Continuar para pagamento';checkoutButton.style.display='none';form.appendChild(checkoutButton);
 function openWallueDraftDB(){return new Promise((ok,no)=>{const r=indexedDB.open('wallue-conecta-drafts',1);r.onupgradeneeded=()=>r.result.createObjectStore('photos');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error);});}
 async function savePendingProfilePhoto(email,file){const d=await openWallueDraftDB();await new Promise((ok,no)=>{const t=d.transaction('photos','readwrite');t.objectStore('photos').put({file},email.toLowerCase());t.oncomplete=ok;t.onerror=()=>no(t.error);});d.close();}
@@ -177,6 +229,11 @@ document.querySelectorAll('[data-plan]').forEach(button=>button.addEventListener
 document.querySelectorAll('[data-profile]').forEach(button=>button.addEventListener('click',()=>{const target=button.dataset.profile;const plans={professional:'professional_monthly',salon:'salon_monthly',client:'client_monthly',company:'company_monthly'};const labels={professional:'Profissional autônomo',salon:'Salão de beleza',client:'Cliente',company:'Empresa'};const prices={professional:'R$ 16,99/mês',salon:'R$ 16,99/mês',client:'R$ 3,99/mês',company:'R$ 16,99/mês'};openSignup(target,plans[target],'Perfil: '+labels[target]+' — '+prices[target]+'. Complete seu cadastro para seguir à área de pagamento.');}));
 function openSignup(profile,planCode,notice){
   selectedPlanCode=planCode||'';
+  approvedCheckoutToken='';
+  preCheckoutPanel.classList.remove('hidden');
+  document.getElementById('authForm').classList.add('hidden');
+  document.getElementById('paidCheckoutNotice').classList.add('hidden');
+  document.getElementById('checkoutEmail').value='';
   document.getElementById('profile').value=profile;
   syncProfileFields();
   setMode('signup');
@@ -206,6 +263,9 @@ const email=document.getElementById('email').value.trim();
 const password=document.getElementById('password').value;
 let result;
 if(mode==='signup'){
+if(!approvedCheckoutToken) throw new Error('Conclua o pagamento e aguarde a confirmação antes de preencher o cadastro.');
+const {data:checkoutCheck,error:checkoutCheckError}=await supabase.functions.invoke('verify-pending-checkout',{body:{token:approvedCheckoutToken}});
+if(checkoutCheckError||!checkoutCheck?.paid) throw new Error('Não encontramos a confirmação do pagamento. O cadastro permanece bloqueado.');
 const {data:{session:activeSession},error:sessionError}=await supabase.auth.getSession();
 if(sessionError) throw sessionError;
 if(activeSession) throw new Error('Você já está conectada a uma conta. Saia da conta atual antes de iniciar um novo cadastro. Seus dados atuais foram preservados.');
@@ -293,6 +353,7 @@ if(savedPlan&&['client_monthly','professional_monthly','salon_monthly','company_
 await openMemberAreas(result.data.user,requestedHubTarget);
 requestedHubTarget='auto';
 await refreshSessionControls();
+checkReturnedCheckout();
 }
 message.className='message';message.style.display='block';
 }catch(err){
