@@ -190,6 +190,21 @@ async function checkReturnedCheckout(){
   if(error)throw error;
   if(!data?.paid){showPreCheckoutMessage('O Mercado Pago ainda não confirmou a assinatura. O cadastro permanece bloqueado. Aguarde a confirmação e atualize esta página.',true);preCheckoutPanel.classList.remove('hidden');return;}
   approvedCheckoutToken=token;
+  if(data.registered){
+    document.getElementById('authForm').classList.remove('hidden');
+    document.getElementById('signupFields').classList.add('hidden');
+    document.getElementById('consentWrap').classList.add('hidden');
+    setMode('login');
+    const {data:{session}}=await supabase.auth.getSession();
+    if(session){
+      showPreCheckoutMessage('Cadastro concluído e assinatura vinculada. Acessando sua área…');
+      await openMemberAreas(session.user,'auto');
+      await refreshSessionControls();
+    }else{
+      showPreCheckoutMessage('Pagamento e cadastro concluídos! Confirme seu e-mail pelo link enviado. Depois, volte a esta página e entre com sua senha.');
+    }
+    return;
+  }
   selectedPlanCode=data.plan_code;
   document.getElementById('profile').value=({client_monthly:'client',professional_monthly:'professional',salon_monthly:'salon',company_monthly:'company'})[data.plan_code]||'';
   syncProfileFields();
@@ -201,7 +216,6 @@ async function checkReturnedCheckout(){
   document.getElementById('preCheckoutPanel').classList.add('hidden');
   showPreCheckoutMessage('Pagamento confirmado! Agora preencha seus dados para concluir o cadastro.');
   setMode('signup');
-  history.replaceState({},'',location.pathname);
  }catch(e){showPreCheckoutMessage('Não foi possível validar o pagamento. O cadastro continua bloqueado. '+(e.message||''),true);}
 }
 function showPreCheckoutMessage(text,isError=false){paidCheckoutNotice.textContent=text;paidCheckoutNotice.classList.remove('hidden');paidCheckoutNotice.classList.toggle('error',isError);}
@@ -300,8 +314,11 @@ plan_code,
 referral_fee_cents:profile==='professional'||profile==='salon'?99:null,
 consent_to_data_processing:true
 };
-if(signupPhoto)await savePendingProfilePhoto(email,signupPhoto);result=await supabase.auth.signUp({email,password,options:{emailRedirectTo:location.href.split('?')[0],data:metadata}});
+if(signupPhoto)await savePendingProfilePhoto(email,signupPhoto);result=await supabase.auth.signUp({email,password,options:{emailRedirectTo:location.origin+location.pathname+'?checkout_token='+encodeURIComponent(approvedCheckoutToken),data:metadata}});
 if(result.error) throw result.error;
+if(!result.data.user?.id) throw new Error('Não foi possível identificar a conta criada. Verifique o e-mail antes de tentar novamente.');
+const {data:finalized,error:finalizeError}=await supabase.functions.invoke('finalize-paid-registration',{body:{token:approvedCheckoutToken,user_id:result.data.user.id}});
+if(finalizeError||!finalized?.subscription_linked) throw new Error(finalized?.error||'A conta foi criada, mas não conseguimos vincular a assinatura. Não tente pagar novamente; procure o suporte.');
 let insertError=null;
 if(profile==='company'){
 const {error}=await supabase.from('company_registrations').insert({
