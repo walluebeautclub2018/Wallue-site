@@ -392,6 +392,17 @@ async function openMemberAreas(user,target='auto'){
   signedInUser=user;
   const {data:profile,error}=await supabase.from('wallue_profiles').select('profile_type,full_name,company_name,city,neighborhood,whatsapp,service_interest,instagram_url').eq('user_id',user.id).maybeSingle();
   if(error||!profile){showFeatureMessage('directoryMessage','Seu perfil ainda não está disponível. Entre em contato com o suporte para regularizar o cadastro.',true);return;}
+  const {data:activeSubscription,error:subscriptionError}=await supabase.from('wallue_subscriptions').select('id,status,plan_code').eq('user_id',user.id).eq('status','authorized').order('updated_at',{ascending:false}).limit(1).maybeSingle();
+  if(subscriptionError){message.textContent='Não foi possível confirmar seu pagamento agora. Sua área ficará protegida até a verificação ser concluída.';message.className='message error';message.style.display='block';return;}
+  if(!activeSubscription){
+    memberHub.classList.add('hidden');
+    checkoutButton.style.display='block';
+    checkoutButton.disabled=false;
+    checkoutButton.textContent='Continuar para pagamento';
+    message.textContent='Cadastro localizado. Para liberar sua área, conclua a assinatura mensal e aguarde a confirmação do Mercado Pago.';
+    message.className='message';message.style.display='block';
+    return;
+  }
   signedInProfile=profile.profile_type;
   memberHub.classList.remove('hidden');
   const editIds={editFullName:profile.full_name,editCompanyName:profile.company_name,editCity:profile.city,editNeighborhood:profile.neighborhood,editWhatsapp:profile.whatsapp,editService:profile.service_interest,editInstagram:profile.instagram_url};
