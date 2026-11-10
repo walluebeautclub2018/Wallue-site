@@ -191,6 +191,8 @@ async function checkReturnedCheckout(){
   if(!data?.paid){showPreCheckoutMessage('O Mercado Pago ainda não confirmou a assinatura. O cadastro permanece bloqueado. Aguarde a confirmação e atualize esta página.',true);preCheckoutPanel.classList.remove('hidden');return;}
   approvedCheckoutToken=token;
   if(data.registered){
+    document.getElementById('email').value=data.email;
+    document.getElementById('email').readOnly=true;
     document.getElementById('authForm').classList.remove('hidden');
     document.getElementById('signupFields').classList.add('hidden');
     document.getElementById('consentWrap').classList.add('hidden');
@@ -356,6 +358,10 @@ if(result.data.session){form.reset();setMode('login');}
 }else{
 result=await supabase.auth.signInWithPassword({email,password});
 if(result.error) throw result.error;
+if(approvedCheckoutToken){
+ const {data:finalized,error:finalizeError}=await supabase.functions.invoke('finalize-paid-registration',{body:{token:approvedCheckoutToken,user_id:result.data.user.id}});
+ if(finalizeError||!finalized?.subscription_linked) throw new Error(finalized?.error||'Não conseguimos concluir o vínculo da assinatura. Procure o suporte antes de iniciar outro pagamento.');
+}
 const savedPlan=result.data.user?.user_metadata?.plan_code;
 if(savedPlan&&['client_monthly','professional_monthly','salon_monthly','company_monthly'].includes(savedPlan)){
   message.textContent='Login realizado. Você pode gerenciar suas fotos e, quando desejar, continuar para o pagamento do seu plano.';
