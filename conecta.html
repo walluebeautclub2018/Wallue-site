@@ -420,6 +420,7 @@ async function performSignOut(button){
 document.getElementById('signOutButton').addEventListener('click',()=>performSignOut(document.getElementById('signOutButton')));
 document.getElementById('memberSignOutButton').addEventListener('click',()=>performSignOut(document.getElementById('memberSignOutButton')));
 refreshSessionControls();
+checkReturnedCheckout();
 let signedInProfile=null, signedInUser=null;
 function showFeatureMessage(id,text,isError=false){const el=document.getElementById(id);el.textContent=text;el.classList.remove('hidden');el.classList.toggle('error',isError);}
 function esc(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
