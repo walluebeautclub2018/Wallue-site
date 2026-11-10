@@ -167,7 +167,7 @@ document.getElementById('signupFields').classList.add('hidden');
 document.getElementById('consentWrap').classList.add('hidden');
 document.getElementById('startCheckoutButton').addEventListener('click',async()=>{
  const email=document.getElementById('checkoutEmail').value.trim().toLowerCase();
- if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)){showPreCheckoutMessage('Informe um e-mail válido antes de continuar.',true);return;}
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showPreCheckoutMessage('Informe um e-mail válido antes de continuar.',true);return;}
  if(!selectedPlanCode){showPreCheckoutMessage('Escolha primeiro uma modalidade e um plano.',true);return;}
  const btn=document.getElementById('startCheckoutButton');btn.disabled=true;btn.textContent='Preparando pagamento…';
  try{
@@ -220,7 +220,7 @@ async function checkReturnedCheckout(){
   setMode('signup');
  }catch(e){showPreCheckoutMessage('Não foi possível validar o pagamento. O cadastro continua bloqueado. '+(e.message||''),true);}
 }
-function showPreCheckoutMessage(text,isError=false){paidCheckoutNotice.textContent=text;paidCheckoutNotice.classList.remove('hidden');paidCheckoutNotice.classList.toggle('error',isError);}
+
 const checkoutButton=document.createElement('button');checkoutButton.type='button';checkoutButton.className='primary';checkoutButton.textContent='Continuar para pagamento';checkoutButton.style.display='none';form.appendChild(checkoutButton);
 function openWallueDraftDB(){return new Promise((ok,no)=>{const r=indexedDB.open('wallue-conecta-drafts',1);r.onupgradeneeded=()=>r.result.createObjectStore('photos');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error);});}
 async function savePendingProfilePhoto(email,file){const d=await openWallueDraftDB();await new Promise((ok,no)=>{const t=d.transaction('photos','readwrite');t.objectStore('photos').put({file},email.toLowerCase());t.oncomplete=ok;t.onerror=()=>no(t.error);});d.close();}
