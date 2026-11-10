@@ -411,6 +411,15 @@ async function openMemberAreas(user,target='auto'){
   if(canPublish)await loadReceivedInterests();
   showMemberView('menu');
   memberHub.scrollIntoView({behavior:'smooth',block:'start'});
+  // Os atalhos do painel público devem abrir diretamente a ferramenta solicitada
+  // depois que o login e a assinatura autorizada forem confirmados.
+  if(target==='client'){
+    showMemberView('area');
+    document.getElementById('memberDirectory').scrollIntoView({behavior:'smooth',block:'start'});
+  }else if(target==='opportunities'){
+    showMemberView('area');
+    document.getElementById('memberOpportunities').scrollIntoView({behavior:'smooth',block:'start'});
+  }
 }
 document.getElementById('searchDirectory').addEventListener('click',loadDirectory);
 document.getElementById('publishOpportunity').addEventListener('click',async()=>{const btn=document.getElementById('publishOpportunity');btn.disabled=true;try{const title=document.getElementById('oppTitle').value.trim(),description=document.getElementById('oppDescription').value.trim(),category=document.getElementById('oppCategory').value.trim(),city=document.getElementById('oppCity').value.trim();if(title.length<3||description.length<10||category.length<2||city.length<2)throw new Error('Preencha título, descrição, categoria e cidade.');if(!document.getElementById('oppConsent').checked)throw new Error('Autorize a publicação antes de continuar.');const type=document.getElementById('oppType').value;const publisher_type=signedInProfile==='company'?'empresa':'profissional';const {error}=await supabase.from('opportunities').insert({publisher_user_id:signedInUser.id,publisher_type,opportunity_type:type,title,description,category,city,neighborhood:document.getElementById('oppNeighborhood').value.trim()||null,contact_method:'platform',status:'published',consent_to_publish:true});if(error)throw error;showFeatureMessage('publishMessage','Oportunidade publicada com sucesso!');['oppTitle','oppDescription','oppCategory','oppCity','oppNeighborhood'].forEach(id=>document.getElementById(id).value='');document.getElementById('oppConsent').checked=false;await loadOpportunities();}catch(err){showFeatureMessage('publishMessage',err.message||'Não foi possível publicar.',true);}finally{btn.disabled=false;}});
