@@ -135,7 +135,8 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 <section class="feature-panel hidden" id="myProfilePanel"><h3>Meu perfil</h3><p class="fine">Confira as informações apresentadas no seu perfil Wallue.</p><div id="profilePreview" class="feature-item"></div><div class="feature-actions member-back"><button type="button" data-member-view="menu">Voltar ao menu</button></div></section>
 <section class="feature-panel hidden" id="profileEditPanel"><h3>Atualizar cadastro</h3><p class="fine">Altere seus dados e salve as atualizações.</p><div class="feature-form"><div><label for="editFullName">Nome completo</label><input id="editFullName" maxlength="120"></div><div id="editCompanyWrap" class="hidden"><label for="editCompanyName">Nome da empresa</label><input id="editCompanyName" maxlength="150"></div><div><label for="editCity">Cidade</label><input id="editCity" maxlength="100"></div><div><label for="editNeighborhood">Bairro</label><input id="editNeighborhood" maxlength="100"></div><div><label for="editWhatsapp">WhatsApp</label><input id="editWhatsapp" type="tel" maxlength="20"></div><div><label for="editService">Profissão, serviço ou interesse</label><input id="editService" maxlength="150"></div><div class="wide" id="editInstagramWrap"><label for="editInstagram">Instagram (opcional)</label><input id="editInstagram" type="url" placeholder="https://www.instagram.com/seuperfil/"></div></div><div class="feature-actions"><button type="button" id="saveProfileButton">Salvar alterações</button><button type="button" data-member-view="menu">Voltar ao menu</button></div><div id="profileEditMessage" class="feature-message hidden"></div></section><section class="panel hidden" id="mediaPanel"><div class="feature-actions member-back"><button type="button" data-member-view="menu">Voltar ao menu</button></div>
 <h2>Meu perfil e minhas fotos</h2>
-<p class="fine">Envie uma foto de perfil ou fotos dos seus serviços. Você poderá gerenciar somente os seus arquivos. As imagens publicadas ficam visíveis ao público.</p>
+<p class="fine">A foto de perfil é separada do limite. Você pode manter até <strong>3 imagens de serviços</strong> no perfil e substituir qualquer uma a qualquer momento, sem esperar o mês seguinte. Para trocar uma foto, exclua a antiga e envie a nova; o arquivo excluído também será removido do armazenamento. As imagens publicadas ficam visíveis ao público.</p>
+<p class="fine" id="serviceMediaCount" aria-live="polite">Imagens de serviços: carregando…</p>
 <label for="mediaKind">Tipo de imagem</label>
 <select id="mediaKind"><option value="profile">Foto de perfil</option><option value="service">Foto de serviço / portfólio</option></select>
 <label for="mediaFile">Imagem (JPEG, PNG ou WebP — até 5 MB)</label>
@@ -519,12 +520,14 @@ async function loadMyMedia(){
   const {data,error}=await supabase.from('wallue_profile_media').select('id,media_kind,object_path,caption').eq('user_id',user.id).order('created_at',{ascending:false});
   const list=document.getElementById('mediaList');list.innerHTML='';
   if(error){mediaMessage.textContent='Não foi possível carregar suas imagens: '+error.message;mediaMessage.className='message error';mediaMessage.style.display='block';return;}
+  const serviceCount=(data||[]).filter(item=>item.media_kind==='service').length;
+  document.getElementById('serviceMediaCount').textContent='Imagens de serviços: '+serviceCount+' de 3 utilizadas. '+(serviceCount<3?'Você ainda pode adicionar '+(3-serviceCount)+'.':'Para enviar outra, exclua uma das três atuais.');
   for(const item of (data||[])){
     const {data:{publicUrl}}=supabase.storage.from('wallue-public-media').getPublicUrl(item.object_path);
     const card=document.createElement('div');card.className='media-item';
     const img=document.createElement('img');img.src=publicUrl;img.alt=item.caption||'Imagem do portfólio';img.loading='lazy';img.style.maxWidth='100px';img.style.maxHeight='100px';img.style.objectFit='cover';
     const label=document.createElement('span');label.textContent=(item.media_kind==='profile'?'Foto de perfil':'Foto de serviço')+(item.caption?' — '+item.caption:'');
-    const del=document.createElement('button');del.type='button';del.textContent='Excluir';del.addEventListener('click',async()=>{if(!confirm('Excluir esta imagem?'))return;const {error:re}=await supabase.storage.from('wallue-public-media').remove([item.object_path]);if(re){mediaMessage.textContent=re.message;mediaMessage.className='message error';mediaMessage.style.display='block';return;}const {error:de}=await supabase.from('wallue_profile_media').delete().eq('id',item.id);if(de){mediaMessage.textContent='Arquivo removido, mas o registro não foi atualizado. Contate o suporte.';mediaMessage.className='message error';mediaMessage.style.display='block';return;}await loadMyMedia();});
+    const del=document.createElement('button');del.type='button';del.textContent=item.media_kind==='service'?'Excluir e liberar vaga':'Excluir foto';del.addEventListener('click',async()=>{if(!confirm(item.media_kind==='service'?'Excluir esta imagem de serviço? O arquivo também será removido do armazenamento e você poderá enviar outra imediatamente.':'Excluir esta foto de perfil? O arquivo também será removido do armazenamento.'))return;del.disabled=true;const {error:re}=await supabase.storage.from('wallue-public-media').remove([item.object_path]);if(re){del.disabled=false;mediaMessage.textContent='Não foi possível remover o arquivo: '+re.message;mediaMessage.className='message error';mediaMessage.style.display='block';return;}const {error:de}=await supabase.from('wallue_profile_media').delete().eq('id',item.id);if(de){mediaMessage.textContent='O arquivo foi removido do armazenamento, mas o registro não foi atualizado. Contate o suporte.';mediaMessage.className='message error';mediaMessage.style.display='block';return;}mediaMessage.textContent='Imagem excluída do perfil e do armazenamento.';mediaMessage.className='message';mediaMessage.style.display='block';await loadMyMedia();});
     card.append(img,label,del);list.append(card);
   }
 }
@@ -535,7 +538,13 @@ document.getElementById('uploadMediaButton').addEventListener('click',async()=>{
     const file=document.getElementById('mediaFile').files[0];if(!file)throw new Error('Escolha uma imagem primeiro.');
     if(!['image/jpeg','image/png','image/webp'].includes(file.type))throw new Error('Use JPEG, PNG ou WebP.');
     if(file.size>5*1024*1024)throw new Error('A imagem ultrapassa o limite de 5 MB.');
-    const kind=document.getElementById('mediaKind').value;await uploadWallueMedia(user,file,kind,document.getElementById('mediaCaption').value.trim());
+    const kind=document.getElementById('mediaKind').value;
+    if(kind==='service'){
+      const {count,error:countError}=await supabase.from('wallue_profile_media').select('id',{count:'exact',head:true}).eq('user_id',user.id).eq('media_kind','service');
+      if(countError)throw countError;
+      if(count>=3)throw new Error('Você já utiliza as 3 imagens de serviços. Exclua uma delas para liberar uma vaga e enviar a nova. A foto de perfil não entra nesse limite.');
+    }
+    await uploadWallueMedia(user,file,kind,document.getElementById('mediaCaption').value.trim());
     document.getElementById('mediaFile').value='';document.getElementById('mediaCaption').value='';
     mediaMessage.textContent='Imagem enviada e registrada com sucesso.';mediaMessage.className='message';mediaMessage.style.display='block';await loadMyMedia();
   }catch(err){mediaMessage.textContent=err.message||'Não foi possível enviar a imagem.';mediaMessage.className='message error';mediaMessage.style.display='block';}
