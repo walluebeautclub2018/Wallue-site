@@ -189,7 +189,7 @@ async function checkReturnedCheckout(){
  try{
   const {data,error}=await supabase.functions.invoke('verify-pending-checkout',{body:{token}});
   if(error)throw error;
-  if(!data?.paid){showPreCheckoutMessage('O Mercado Pago ainda não confirmou a assinatura. O cadastro permanece bloqueado. Aguarde a confirmação e atualize esta página.',true);preCheckoutPanel.classList.remove('hidden');return;}
+  if(!data?.paid){showPreCheckoutMessage('O Mercado Pago ainda não confirmou o pagamento. O cadastro permanece bloqueado. Aguarde a confirmação e atualize esta página.',true);preCheckoutPanel.classList.remove('hidden');return;}
   approvedCheckoutToken=token;
   if(data.registered){
     document.getElementById('email').value=data.email;
@@ -200,7 +200,7 @@ async function checkReturnedCheckout(){
     setMode('login');
     const {data:{session}}=await supabase.auth.getSession();
     if(session){
-      showPreCheckoutMessage('Cadastro concluído e assinatura vinculada. Acessando sua área…');
+      showPreCheckoutMessage('Cadastro concluído e pagamento vinculado. Acessando sua área…');
       await openMemberAreas(session.user,'auto');
       await refreshSessionControls();
     }else{
@@ -468,14 +468,14 @@ async function openMemberAreas(user,target='auto'){
   signedInUser=user;
   const {data:profile,error}=await supabase.from('wallue_profiles').select('profile_type,full_name,company_name,city,neighborhood,whatsapp,service_interest,instagram_url').eq('user_id',user.id).maybeSingle();
   if(error||!profile){showFeatureMessage('directoryMessage','Seu perfil ainda não está disponível. Entre em contato com o suporte para regularizar o cadastro.',true);return;}
-  const {data:activeSubscription,error:subscriptionError}=await supabase.from('wallue_subscriptions').select('id,status,plan_code').eq('user_id',user.id).eq('status','authorized').order('updated_at',{ascending:false}).limit(1).maybeSingle();
+  const {data:activeSubscription,error:subscriptionError}=await supabase.from('wallue_subscriptions').select('id,status,plan_code,access_expires_at').eq('user_id',user.id).eq('status','authorized').or('access_expires_at.is.null,access_expires_at.gt.'+new Date().toISOString()).order('updated_at',{ascending:false}).limit(1).maybeSingle();
   if(subscriptionError){message.textContent='Não foi possível confirmar seu pagamento agora. Sua área ficará protegida até a verificação ser concluída.';message.className='message error';message.style.display='block';return;}
   if(!activeSubscription){
     memberHub.classList.add('hidden');
     checkoutButton.style.display='block';
     checkoutButton.disabled=false;
     checkoutButton.textContent='Continuar para pagamento';
-    message.textContent='Cadastro localizado. Para liberar sua área, conclua a assinatura mensal e aguarde a confirmação do Mercado Pago.';
+    message.textContent='Cadastro localizado. Para liberar sua área, realize o pagamento do período e aguarde a confirmação do Mercado Pago.';
     message.className='message';message.style.display='block';
     return;
   }
