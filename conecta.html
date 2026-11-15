@@ -110,6 +110,7 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 </div>
 <label for="email">E-mail</label><input id="email" type="email" autocomplete="email" required>
 <label for="password">Senha (mínimo de 8 caracteres)</label><input id="password" type="password" minlength="8" autocomplete="new-password" required>
+<button type="button" class="secondary" id="forgotPasswordButton" style="display:none;margin-top:10px;width:100%">Esqueci minha senha</button>
 <div id="consentWrap"><label style="display:flex;gap:10px;align-items:flex-start;font-weight:400;margin-top:16px"><input id="consent" type="checkbox" required style="width:auto;margin-top:4px"><span>Autorizo o uso dos meus dados para criar meu cadastro e receber retorno da Wallue Conecta, conforme a finalidade informada.</span></label></div>
 <button class="primary" id="submitButton" type="submit">Criar minha conta</button>
 <div class="message" id="message" role="status" aria-live="polite"></div>
@@ -309,8 +310,27 @@ document.getElementById('openLoginButton').addEventListener('click',()=>{
   selectedPlanNotice.textContent='Entre com o e-mail e a senha da sua conta.';
   document.getElementById('registrationPanel').scrollIntoView({behavior:'smooth',block:'start'});
 });
-function setMode(next){mode=next;signupFields.classList.toggle('hidden',mode==='login');document.getElementById('consentWrap').classList.toggle('hidden',mode==='login');document.getElementById('consent').required=mode==='signup';document.getElementById('fullName').required=mode==='signup';document.getElementById('profile').required=mode==='signup';document.getElementById('city').required=mode==='signup';document.getElementById('whatsapp').required=mode==='signup';syncProfileFields();document.getElementById('companyName').required=mode==='signup'&&document.getElementById('profile').value==='company';document.getElementById('neighborhood').required=mode==='signup'&&document.getElementById('profile').value!=='company';document.getElementById('password').autocomplete=mode==='login'?'current-password':'new-password';submitButton.textContent=mode==='login'?'Entrar':'Criar minha conta';signupTab.classList.toggle('active',mode==='signup');loginTab.classList.toggle('active',mode==='login');message.style.display='none'}
+function setMode(next){mode=next;signupFields.classList.toggle('hidden',mode!=='signup');document.getElementById('consentWrap').classList.toggle('hidden',mode!=='signup');document.getElementById('consent').required=mode==='signup';document.getElementById('fullName').required=mode==='signup';document.getElementById('profile').required=mode==='signup';document.getElementById('city').required=mode==='signup';document.getElementById('whatsapp').required=mode==='signup';syncProfileFields();document.getElementById('companyName').required=mode==='signup'&&document.getElementById('profile').value==='company';document.getElementById('neighborhood').required=mode==='signup'&&document.getElementById('profile').value!=='company';document.getElementById('password').autocomplete=mode==='login'?'current-password':'new-password';submitButton.textContent=mode==='login'?'Entrar':mode==='recovery'?'Salvar nova senha':'Criar minha conta';document.getElementById('forgotPasswordButton').style.display=mode==='login'?'block':'none';signupTab.classList.toggle('active',mode==='signup');loginTab.classList.toggle('active',mode==='login');message.style.display='none'}
 signupTab.addEventListener('click',()=>setMode('signup'));loginTab.addEventListener('click',()=>setMode('login'));
+document.getElementById('forgotPasswordButton').addEventListener('click',async()=>{
+ const email=document.getElementById('email').value.trim().toLowerCase();
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){message.textContent='Informe seu e-mail para receber o link de redefinição.';message.className='message error';message.style.display='block';return;}
+ const button=document.getElementById('forgotPasswordButton');button.disabled=true;button.textContent='Enviando link…';
+ try{
+  const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname+'?reset_password=1'});
+  if(error)throw error;
+  message.textContent='Se houver uma conta para este e-mail, enviaremos um link seguro para criar uma nova senha. Verifique também o spam.';
+  message.className='message';message.style.display='block';
+ }catch(error){message.textContent=error.message||'Não foi possível enviar o link. Tente novamente.';message.className='message error';message.style.display='block';}
+ finally{button.disabled=false;button.textContent='Esqueci minha senha';}
+});
+if(new URLSearchParams(location.search).get('reset_password')==='1'){
+ setMode('recovery');
+ document.getElementById('email').readOnly=true;
+ message.textContent='Defina sua nova senha e toque em Salvar nova senha.';
+ message.className='message';message.style.display='block';
+}
+
 
 // O pacote opcional ficará sem ação até a liberação e os testes da cobrança.
 
@@ -321,7 +341,15 @@ try{
 const email=document.getElementById('email').value.trim();
 const password=document.getElementById('password').value;
 let result;
-if(mode==='signup'){
+if(mode==='recovery'){
+ result=await supabase.auth.updateUser({password});
+ if(result.error)throw result.error;
+ message.textContent='Senha atualizada com sucesso. Agora você já pode entrar com seu e-mail e a nova senha.';
+ message.className='message';message.style.display='block';
+ history.replaceState({},document.title,location.pathname);
+ setMode('login');
+ document.getElementById('password').value='';
+}else if(mode==='signup'){
 if(!approvedCheckoutToken) throw new Error('Conclua o pagamento e aguarde a confirmação antes de preencher o cadastro.');
 const {data:checkoutCheck,error:checkoutCheckError}=await supabase.functions.invoke('verify-pending-checkout',{body:{token:approvedCheckoutToken}});
 if(checkoutCheckError||!checkoutCheck?.paid) throw new Error('Não encontramos a confirmação do pagamento. O cadastro permanece bloqueado.');
@@ -433,7 +461,7 @@ message.textContent=err.message||'Não foi possível concluir. Tente novamente.'
 message.className='message error';message.style.display='block';
 }finally{
 submitButton.disabled=false;
-submitButton.textContent=mode==='login'?'Entrar':'Criar minha conta';
+submitButton.textContent=mode==='login'?'Entrar':mode==='recovery'?'Salvar nova senha':'Criar minha conta';
 }
 });
 
