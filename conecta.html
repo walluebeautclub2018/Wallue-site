@@ -94,7 +94,8 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 <label for="checkoutEmail">E-mail para receber a confirmação do pagamento</label>
 <input id="checkoutEmail" type="email" autocomplete="email" placeholder="seuemail@exemplo.com">
 <button type="button" class="primary" id="startCheckoutButton">Ir para pagamento seguro</button>
-<p class="fine">Primeiro você escolhe o plano e paga. O formulário completo de cadastro será liberado somente após a confirmação do Mercado Pago.</p>
+<button type="button" class="secondary" id="recoverPaidRegistrationButton" style="display:block;margin-top:10px;width:100%">Já paguei — recuperar meu cadastro</button>
+<p class="fine">Primeiro você escolhe o plano e paga. O formulário completo de cadastro será liberado somente após a confirmação do Mercado Pago. Se já pagou e não conseguiu concluir, use a recuperação segura.</p>
 </div>
 <div id="paidCheckoutNotice" class="message hidden" role="status"></div>
 <form id="authForm">
@@ -162,6 +163,7 @@ const form=document.getElementById('authForm'), signupFields=document.getElement
 const signupTab=document.getElementById('signupTab'),loginTab=document.getElementById('loginTab');
 const submitButton=document.getElementById('submitButton'),message=document.getElementById('message');
 let approvedCheckoutToken='';
+const paidRecoveryMode=new URLSearchParams(location.search).get('paid_recovery')==='1';
 const preCheckoutPanel=document.getElementById('preCheckoutPanel');
 const paidCheckoutNotice=document.getElementById('paidCheckoutNotice');
 document.getElementById('signupFields').classList.add('hidden');
@@ -180,6 +182,19 @@ document.getElementById('startCheckoutButton').addEventListener('click',async()=
  finally{btn.disabled=false;btn.textContent='Ir para pagamento seguro';}
 });
 function showPreCheckoutMessage(text,isError=false){paidCheckoutNotice.textContent=text;paidCheckoutNotice.classList.remove('hidden');paidCheckoutNotice.classList.toggle('error',isError);}
+document.getElementById('recoverPaidRegistrationButton').addEventListener('click',async()=>{
+ const email=(document.getElementById('checkoutEmail').value||document.getElementById('email').value||'').trim().toLowerCase();
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showPreCheckoutMessage('Informe o mesmo e-mail utilizado no pagamento.',true);return;}
+ const button=document.getElementById('recoverPaidRegistrationButton');button.disabled=true;button.textContent='Verificando pagamento…';
+ try{
+  const {data,error}=await supabase.functions.invoke('recover-paid-registration',{body:{email}});
+  if(error)throw error;
+  if(!data?.ok)throw new Error(data?.message||'Não foi possível iniciar a recuperação.');
+  showPreCheckoutMessage(data.message||'Se houver um pagamento autorizado para este e-mail, enviaremos as instruções.');
+ }catch(e){showPreCheckoutMessage(e.message||'Não foi possível iniciar a recuperação. Tente novamente.',true);}
+ finally{button.disabled=false;button.textContent='Já paguei — recuperar meu cadastro';}
+});
+
 async function checkReturnedCheckout(){
  const params=new URLSearchParams(location.search);const token=params.get('checkout_token');
  if(!token)return;
@@ -312,7 +327,7 @@ const {data:checkoutCheck,error:checkoutCheckError}=await supabase.functions.inv
 if(checkoutCheckError||!checkoutCheck?.paid) throw new Error('Não encontramos a confirmação do pagamento. O cadastro permanece bloqueado.');
 const {data:{session:activeSession},error:sessionError}=await supabase.auth.getSession();
 if(sessionError) throw sessionError;
-if(activeSession) throw new Error('Você já está conectada a uma conta. Saia da conta atual antes de iniciar um novo cadastro. Seus dados atuais foram preservados.');
+if(activeSession&&!paidRecoveryMode) throw new Error('Você já está conectada a uma conta. Saia da conta atual antes de iniciar um novo cadastro. Seus dados atuais foram preservados.');
 const profile=document.getElementById('profile').value;
 const fullName=document.getElementById('fullName').value.trim();
 const city=document.getElementById('city').value.trim();
@@ -341,7 +356,13 @@ plan_code,
 referral_fee_cents:profile==='professional'||profile==='salon'?99:null,
 consent_to_data_processing:true
 };
-if(signupPhoto)await savePendingProfilePhoto(email,signupPhoto);result=await supabase.auth.signUp({email,password,options:{emailRedirectTo:location.origin+location.pathname+'?checkout_token='+encodeURIComponent(approvedCheckoutToken),data:metadata}});
+if(signupPhoto)await savePendingProfilePhoto(email,signupPhoto);
+if(paidRecoveryMode){
+ if(!activeSession?.user?.id)throw new Error('Abra o link de recuperação enviado ao seu e-mail antes de concluir o cadastro.');
+ result=await supabase.auth.updateUser({password,data:metadata});
+}else{
+ result=await supabase.auth.signUp({email,password,options:{emailRedirectTo:location.origin+location.pathname+'?checkout_token='+encodeURIComponent(approvedCheckoutToken),data:metadata}});
+}
 if(result.error) throw result.error;
 if(!result.data.user?.id) throw new Error('Não foi possível identificar a conta criada. Verifique o e-mail antes de tentar novamente.');
 const {data:finalized,error:finalizeError}=await supabase.functions.invoke('finalize-paid-registration',{body:{token:approvedCheckoutToken,user_id:result.data.user.id}});
