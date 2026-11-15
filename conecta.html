@@ -183,13 +183,33 @@ function showPreCheckoutMessage(text,isError=false){paidCheckoutNotice.textConte
 async function checkReturnedCheckout(){
  const params=new URLSearchParams(location.search);const token=params.get('checkout_token');
  if(!token)return;
- document.getElementById('registrationPanel').classList.remove('hidden');
- selectedPlanNotice.textContent='Verificando a confirmação do Mercado Pago…';
+ const registrationPanel=document.getElementById('registrationPanel');
+ registrationPanel.classList.remove('hidden');
+ selectedPlanNotice.textContent='Confirmando seu pagamento com o Mercado Pago…';
  preCheckoutPanel.classList.add('hidden');
  try{
-  const {data,error}=await supabase.functions.invoke('verify-pending-checkout',{body:{token}});
-  if(error)throw error;
-  if(!data?.paid){showPreCheckoutMessage('O Mercado Pago ainda não confirmou o pagamento. O cadastro permanece bloqueado. Aguarde a confirmação e atualize esta página.',true);preCheckoutPanel.classList.remove('hidden');return;}
+  let data=null,lastError=null;
+  // A confirmação pode chegar alguns segundos depois do redirecionamento.
+  // Consultamos a API do Mercado Pago pelo backend; nunca confiamos no navegador.
+  for(let attempt=0;attempt<30;attempt++){
+    const result=await supabase.functions.invoke('verify-pending-checkout',{body:{token}});
+    if(!result.error&&result.data?.paid){data=result.data;break;}
+    if(result.error)lastError=result.error;
+    else if(result.data?.status==='rejected'||result.data?.status==='failed'){
+      data=result.data;break;
+    }
+    if(attempt<29){
+      showPreCheckoutMessage('Pagamento recebido. Estamos aguardando a confirmação final do Mercado Pago…');
+      await new Promise(resolve=>setTimeout(resolve,2000));
+    }
+  }
+  if(!data?.paid){
+    showPreCheckoutMessage(lastError
+      ?'Ainda não foi possível confirmar com o Mercado Pago. O cadastro permanece protegido. Tente atualizar esta página em instantes.'
+      :'O Mercado Pago ainda não confirmou o pagamento. O cadastro permanece bloqueado; não faça outro pagamento.',true);
+    preCheckoutPanel.classList.remove('hidden');
+    return;
+  }
   approvedCheckoutToken=token;
   if(data.registered){
     document.getElementById('email').value=data.email;
@@ -200,11 +220,11 @@ async function checkReturnedCheckout(){
     setMode('login');
     const {data:{session}}=await supabase.auth.getSession();
     if(session){
-      showPreCheckoutMessage('Cadastro concluído e pagamento vinculado. Acessando sua área…');
+      showPreCheckoutMessage('Cadastro concluído e pagamento confirmado. Abrindo sua área…');
       await openMemberAreas(session.user,'auto');
       await refreshSessionControls();
     }else{
-      showPreCheckoutMessage('Pagamento e cadastro concluídos! Confirme seu e-mail pelo link enviado. Depois, volte a esta página e entre com sua senha.');
+      showPreCheckoutMessage('Pagamento confirmado! Sua conta já existe. Entre com seu e-mail e senha para acessar.');
     }
     return;
   }
@@ -217,9 +237,11 @@ async function checkReturnedCheckout(){
   document.getElementById('consentWrap').classList.remove('hidden');
   document.getElementById('authForm').classList.remove('hidden');
   document.getElementById('preCheckoutPanel').classList.add('hidden');
-  showPreCheckoutMessage('Pagamento confirmado! Agora preencha seus dados para concluir o cadastro.');
+  showPreCheckoutMessage('Pagamento confirmado! Agora crie sua conta para concluir o cadastro.');
   setMode('signup');
- }catch(e){showPreCheckoutMessage('Não foi possível validar o pagamento. O cadastro continua bloqueado. '+(e.message||''),true);}
+ }catch(e){
+  showPreCheckoutMessage('Não foi possível validar o pagamento. O cadastro continua bloqueado. '+(e.message||''),true);
+ }
 }
 
 const checkoutButton=document.createElement('button');checkoutButton.type='button';checkoutButton.className='primary';checkoutButton.textContent='Continuar para pagamento';checkoutButton.style.display='none';form.appendChild(checkoutButton);
