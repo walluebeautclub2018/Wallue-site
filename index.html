@@ -4,11 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#32104f">
-  <meta http-equiv="refresh" content="0;url=conecta.html">
   <title>Wallue Conecta — Conexões que transformam</title>
   <link rel="canonical" href="conecta.html">
   <script>
-    window.location.replace(new URL("conecta.html", window.location.href).toString());
+    // Preserve secure checkout/invitation query parameters during the app redirect.
+    const destination = new URL("conecta.html", window.location.href);
+    destination.search = window.location.search;
+    destination.hash = window.location.hash;
+    window.location.replace(destination.toString());
   </script>
 </head>
 <body>
