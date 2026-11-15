@@ -164,7 +164,7 @@ const form=document.getElementById('authForm'), signupFields=document.getElement
 const signupTab=document.getElementById('signupTab'),loginTab=document.getElementById('loginTab');
 const submitButton=document.getElementById('submitButton'),message=document.getElementById('message');
 let approvedCheckoutToken='';
-const paidRecoveryMode=new URLSearchParams(location.search).get('paid_recovery')==='1';
+let paidRecoveryMode=new URLSearchParams(location.search).get('paid_recovery')==='1';
 const preCheckoutPanel=document.getElementById('preCheckoutPanel');
 const paidCheckoutNotice=document.getElementById('paidCheckoutNotice');
 document.getElementById('signupFields').classList.add('hidden');
@@ -324,10 +324,16 @@ document.getElementById('forgotPasswordButton').addEventListener('click',async()
  }catch(error){message.textContent=error.message||'Não foi possível enviar o link. Tente novamente.';message.className='message error';message.style.display='block';}
  finally{button.disabled=false;button.textContent='Esqueci minha senha';}
 });
-if(new URLSearchParams(location.search).get('reset_password')==='1'){
+const authParams=new URLSearchParams(location.search);
+if(authParams.get('reset_password')==='1'){
+ document.getElementById('registrationPanel').classList.remove('hidden');
+ document.getElementById('authForm').classList.remove('hidden');
+ document.getElementById('preCheckoutPanel').classList.add('hidden');
+ document.getElementById('paidCheckoutNotice').classList.add('hidden');
  setMode('recovery');
  document.getElementById('email').readOnly=true;
- message.textContent='Defina sua nova senha e toque em Salvar nova senha.';
+ supabase.auth.getUser().then(({data})=>{if(data?.user?.email)document.getElementById('email').value=data.user.email;});
+ message.textContent='Link confirmado. Digite sua nova senha e toque em Salvar nova senha.';
  message.className='message';message.style.display='block';
 }
 
@@ -472,10 +478,12 @@ const sessionControls=document.getElementById('sessionControls');
 const sessionStatusText=document.getElementById('sessionStatusText');
 async function refreshSessionControls(){
   const {data:{user},error}=await supabase.auth.getUser();
-  if(error){sessionControls.classList.add('hidden');return;}
-  sessionControls.classList.toggle('hidden',!user);
-  sessionControls.style.display=user?'block':'none';
-  if(user)sessionStatusText.textContent='Há uma conta conectada ('+user.email+'). Para criar outro cadastro, saia primeiro.';
+  if(error||!user){sessionControls.classList.add('hidden');sessionControls.style.display='none';return;}
+  const meta=user.user_metadata||{};
+  const hasCompletedProfile=meta.consent_to_data_processing===true&&String(meta.full_name||'').trim().length>=2&&String(meta.city||'').trim().length>=2;
+  sessionControls.classList.toggle('hidden',!hasCompletedProfile);
+  sessionControls.style.display=hasCompletedProfile?'block':'none';
+  if(hasCompletedProfile)sessionStatusText.textContent='Conta conectada ('+user.email+'). Para trocar de conta, saia primeiro.';
 }
 async function performSignOut(button){
   button.disabled=true;button.textContent='Saindo…';
@@ -499,8 +507,49 @@ async function performSignOut(button){
 }
 document.getElementById('signOutButton').addEventListener('click',()=>performSignOut(document.getElementById('signOutButton')));
 document.getElementById('memberSignOutButton').addEventListener('click',()=>performSignOut(document.getElementById('memberSignOutButton')));
+async function resumeInvitedPaidAccount(){
+ const {data:{session}}=await supabase.auth.getSession();
+ if(!session?.user?.email)return;
+ const meta=session.user.user_metadata||{};
+ const invitePending=meta.paid_checkout_recovery===true||paidRecoveryMode;
+ if(!invitePending)return;
+ try{
+  const {data,error}=await supabase.functions.invoke('resume-paid-registration',{body:{}});
+  if(error||!data?.ok)throw error||new Error(data?.error||'Não foi possível recuperar o pagamento.');
+  approvedCheckoutToken=data.token;
+  paidRecoveryMode=true;
+  selectedPlanCode=data.plan_code;
+  document.getElementById('profile').value=data.profile_type;
+  syncProfileFields();
+  document.getElementById('email').value=data.email;
+  document.getElementById('email').readOnly=true;
+  document.getElementById('registrationPanel').classList.remove('hidden');
+  document.getElementById('preCheckoutPanel').classList.add('hidden');
+  document.getElementById('authForm').classList.remove('hidden');
+  document.getElementById('signupFields').classList.remove('hidden');
+  document.getElementById('consentWrap').classList.remove('hidden');
+  document.getElementById('paidCheckoutNotice').classList.remove('hidden');
+  showPreCheckoutMessage('E-mail confirmado e pagamento localizado. Complete os dados do perfil e crie sua senha para concluir o cadastro.');
+  setMode('signup');
+  await refreshSessionControls();
+  document.getElementById('registrationPanel').scrollIntoView({behavior:'smooth',block:'start'});
+ }catch(e){
+  document.getElementById('registrationPanel').classList.remove('hidden');
+  document.getElementById('authForm').classList.remove('hidden');
+  document.getElementById('preCheckoutPanel').classList.add('hidden');
+  showPreCheckoutMessage('Encontramos uma sessão de convite, mas não conseguimos validar o pagamento automaticamente. Não pague novamente. '+(e.message||''),true);
+ }
+}
 refreshSessionControls();
-checkReturnedCheckout();
+(async()=>{
+ if(authParams.get('reset_password')==='1'){
+   const {data:{session}}=await supabase.auth.getSession();
+   if(!session){message.textContent='O link de redefinição expirou ou não foi validado. Solicite outro link em Esqueci minha senha.';message.className='message error';message.style.display='block';}
+ }else{
+   await checkReturnedCheckout();
+   await resumeInvitedPaidAccount();
+ }
+})();
 let signedInProfile=null, signedInUser=null;
 function showFeatureMessage(id,text,isError=false){const el=document.getElementById(id);el.textContent=text;el.classList.remove('hidden');el.classList.toggle('error',isError);}
 function esc(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
