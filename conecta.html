@@ -728,8 +728,8 @@ async function loadPublicDirectoryPreview(){
   const specialty=document.createElement('p');specialty.textContent=p.service_interest||(p.profile_type==='salon'?'Salão de beleza':'Profissional');card.append(specialty);
   const locality=document.createElement('p');locality.textContent=[p.city,p.neighborhood].filter(Boolean).join(' — ');card.append(locality);
   const kind=document.createElement('p');kind.className='fine';kind.textContent=p.profile_type==='salon'?'Salão':'Profissional autônomo';card.append(kind);
-  const {data:media}=await supabase.from('wallue_profile_media').select('object_path,caption').eq('user_id',p.user_id).eq('is_public',true).eq('media_kind','service').order('created_at',{ascending:false}).limit(3);
-  for(const m of (media||[])){const {data:{publicUrl}}=supabase.storage.from('wallue-public-media').getPublicUrl(m.object_path);const img=document.createElement('img');img.src=publicUrl;img.alt=m.caption||'Prévia de trabalho';img.loading='lazy';img.draggable=false;img.style.cssText='width:100%;max-height:150px;object-fit:cover;border-radius:10px;margin-top:8px;pointer-events:none;user-select:none';card.append(img);}
+  // A prévia anônima mostra somente dados de identificação profissional e localidade.
+  // Imagens e detalhes do perfil permanecem na área autenticada.
   const gate=document.createElement('button');gate.type='button';gate.textContent='Entre para abrir o perfil completo';gate.style.cssText='margin-top:12px;border:1px solid #e4c078;border-radius:24px;background:#f1e6d8;color:#32104f;padding:10px 14px;font-weight:700';gate.addEventListener('click',openPublicDirectoryLogin);card.append(gate);
   results.append(card);
  }
