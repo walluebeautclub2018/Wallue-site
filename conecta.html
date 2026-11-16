@@ -90,7 +90,7 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 
 
 /* Abertura principal Wallue Conecta — arte responsiva com áreas clicáveis acessíveis. */
-.opening-card{max-width:780px;margin:24px auto 30px;padding:10px;border:2px solid var(--gold);border-radius:22px;background:#32104f;box-shadow:0 14px 34px #32104f25}
+.opening-card{max-width:474px;margin:24px auto 30px;padding:10px;border:2px solid var(--gold);border-radius:22px;background:#32104f;box-shadow:0 14px 34px #32104f25}
 .opening-stage{position:relative;width:100%;line-height:0;overflow:hidden;border-radius:14px}
 .opening-stage>img{display:block;width:100%;height:auto}
 .opening-hotspot{position:absolute;display:block;padding:0;margin:0;border:0;border-radius:22px;background:transparent;cursor:pointer;line-height:normal}
@@ -206,6 +206,14 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 <div class="tabs"><button id="signupTab" class="active" type="button">Criar conta</button><button id="loginTab" type="button">Entrar</button></div>
 <div id="sessionControls" class="message hidden" role="status" style="margin:12px 0"><span id="sessionStatusText">Você já está conectada a uma conta.</span><button type="button" id="signOutButton" class="secondary" style="display:block;margin-top:10px">Sair da conta</button></div>
 <div id="preCheckoutPanel" class="panel" style="margin:0 0 16px">
+<label for="checkoutProfile">Escolha seu perfil</label>
+<select id="checkoutProfile">
+<option value="">Selecione seu perfil</option>
+<option value="professional">Profissional autônomo — R$ 16,99/mês</option>
+<option value="salon">Proprietário de salão — R$ 16,99/mês</option>
+<option value="client">Cliente — R$ 4,99/mês</option>
+<option value="company">Empresa parceira — R$ 16,99/mês</option>
+</select>
 <label for="checkoutEmail">E-mail para receber a confirmação do pagamento</label>
 <input id="checkoutEmail" type="email" autocomplete="email" placeholder="seuemail@exemplo.com">
 <button type="button" class="primary" id="startCheckoutButton">Ir para pagamento seguro</button>
@@ -439,7 +447,8 @@ function openSignup(profile,planCode,notice){
   document.getElementById('authForm').classList.add('hidden');
   document.getElementById('paidCheckoutNotice').classList.add('hidden');
   document.getElementById('checkoutEmail').value='';
-  document.getElementById('profile').value=profile;
+  document.getElementById('checkoutProfile').value=profile||'';
+  document.getElementById('profile').value=profile||'professional';
   syncProfileFields();
   setMode('signup');
   selectedPlanNotice.textContent=notice;
@@ -447,6 +456,34 @@ function openSignup(profile,planCode,notice){
   document.getElementById('registrationPanel').classList.remove('hidden');
   document.getElementById('registrationPanel').scrollIntoView({behavior:'smooth',block:'start'});
 }
+
+function openPlanSelection(){
+  selectedPlanCode='';
+  approvedCheckoutToken='';
+  document.getElementById('registrationPanel').classList.remove('hidden');
+  preCheckoutPanel.classList.remove('hidden');
+  document.getElementById('authForm').classList.add('hidden');
+  document.getElementById('paidCheckoutNotice').classList.add('hidden');
+  document.getElementById('checkoutProfile').value='';
+  document.getElementById('checkoutEmail').value='';
+  selectedPlanNotice.textContent='Selecione seu perfil e informe seu e-mail para continuar ao pagamento.';
+  selectedPlanNotice.style.display='block';
+  document.getElementById('registrationPanel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+document.getElementById('checkoutProfile').addEventListener('change',()=>{
+  const profile=document.getElementById('checkoutProfile').value;
+  const plans={professional:'professional_monthly',salon:'salon_monthly',client:'client_monthly',company:'company_monthly'};
+  const labels={professional:'Profissional autônomo',salon:'Proprietário de salão',client:'Cliente',company:'Empresa parceira'};
+  selectedPlanCode=plans[profile]||'';
+  if(profile){
+    document.getElementById('profile').value=profile;
+    syncProfileFields();
+    selectedPlanNotice.textContent='Perfil selecionado: '+labels[profile]+'. Informe seu e-mail para seguir ao pagamento.';
+  }else{
+    selectedPlanNotice.textContent='Selecione seu perfil e informe seu e-mail para continuar ao pagamento.';
+  }
+});
 
 document.getElementById('openLoginButton').addEventListener('click',()=>{
   selectedPlanCode='';
@@ -852,17 +889,18 @@ document.getElementById('uploadMediaButton').addEventListener('click',async()=>{
   finally{button.disabled=false;button.textContent='Enviar imagem';}
 });
 document.querySelectorAll('[data-merch-tab]').forEach(tab=>tab.addEventListener('click',()=>{const key=tab.dataset.merchTab;document.querySelectorAll('[data-merch-tab]').forEach(item=>{const active=item===tab;item.classList.toggle('active',active);item.setAttribute('aria-selected',active?'true':'false');});document.querySelectorAll('.merch-panel').forEach(panel=>{const active=panel.id==='merch-panel-'+key;panel.hidden=!active;});}));
-document.getElementById('openSignupButton').addEventListener('click',()=>{document.querySelector('.entry-cards')?.scrollIntoView({behavior:'smooth',block:'start'});});
+document.getElementById('openSignupButton').addEventListener('click',openPlanSelection);
 document.querySelectorAll('[data-opening-action]').forEach(button=>button.addEventListener('click',()=>{
   const action=button.dataset.openingAction;
-  const targets={
-    create:document.getElementById('openSignupButton'),
-    login:document.getElementById('openLoginButton'),
-    professional:document.querySelector('.entry-cards [data-profile="professional"]'),
-    client:document.querySelector('.entry-cards [data-profile="client"]'),
-    company:document.querySelector('.entry-cards [data-profile="company"]')
+  if(action==='create'){openPlanSelection();return;}
+  if(action==='login'){document.getElementById('openLoginButton').click();return;}
+  const profiles={
+    professional:{profile:'professional',plan:'professional_monthly',label:'Profissional autônomo',price:'R$ 16,99/mês'},
+    client:{profile:'client',plan:'client_monthly',label:'Cliente',price:'R$ 4,99/mês'},
+    company:{profile:'company',plan:'company_monthly',label:'Empresa parceira',price:'R$ 16,99/mês'}
   };
-  targets[action]?.click();
+  const choice=profiles[action];
+  if(choice)openSignup(choice.profile,choice.plan,'Perfil: '+choice.label+' — '+choice.price+'. Informe seu e-mail para seguir ao pagamento.');
 }));
 
 document.querySelectorAll('[data-story-tab]').forEach(tab=>tab.addEventListener('click',()=>{const key=tab.dataset.storyTab;document.querySelectorAll('[data-story-tab]').forEach(item=>{const active=item===tab;item.classList.toggle('active',active);item.setAttribute('aria-selected',active?'true':'false');});document.querySelectorAll('.story-panel').forEach(panel=>{const active=panel.id==='story-panel-'+key;panel.hidden=!active;panel.classList.toggle('active',active);});}));
