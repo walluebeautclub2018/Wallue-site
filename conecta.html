@@ -430,7 +430,7 @@ insertError=error;
 const {error}=await supabase.from('client_registrations').insert({
 nome:fullName,cidade:city,whatsapp,
 interesse:service||'Encontrar profissionais e serviços na Wallue Conecta',
-payment_method:'mercadopago',consentimento:true
+payment_method:'mercadopago',consentimento:true,whatsapp_notifications_opt_in:false
 });
 insertError=error;
 }else{
