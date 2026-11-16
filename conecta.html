@@ -109,19 +109,16 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 <main>
 <section class="opening-card" id="wallueOpeningCard" aria-label="Abertura da Wallue Conecta">
 <div class="opening-stage">
-<img id="wallueOpeningImage" alt="Abertura da Wallue Conecta" width="240" height="260" data-image-file="wallue-conecta-abertura.webp.b64" alt="Wallue Conecta — Ana apresenta as opções para profissionais, clientes e empresas">
+<img id="wallueOpeningImage" alt="Abertura da Wallue Conecta" width="450" height="487" data-image-files="wallue-opening-hires-1.b64,wallue-opening-hires-2.b64,wallue-opening-hires-3.b64,wallue-opening-hires-4.b64" alt="Wallue Conecta — Ana apresenta as opções para profissionais, clientes e empresas">
 <button class="opening-hotspot opening-create" type="button" data-opening-action="create" aria-label="Criar conta"></button>
 <button class="opening-hotspot opening-login" type="button" data-opening-action="login" aria-label="Entrar na conta"></button>
 <button class="opening-hotspot opening-professional" type="button" data-opening-action="professional" aria-label="Cadastrar como profissional"></button>
 <button class="opening-hotspot opening-client" type="button" data-opening-action="client" aria-label="Cadastrar como cliente"></button>
 <button class="opening-hotspot opening-company" type="button" data-opening-action="company" aria-label="Cadastrar como empresa"></button>
 </div>
-<p class="opening-fallback">Selecione uma das opções na arte. Os mesmos cadastros também continuam disponíveis nos cards abaixo.</p>
+<p class="opening-fallback">Use os botões da arte para criar sua conta, entrar ou escolher seu perfil.</p>
 </section>
 <main>
-<section class="hero" id="inicio"><div class="hero-copy"><h1>Oi! Eu sou a Ana.</h1><p style="color:#b78a35;font-weight:700;letter-spacing:2px;text-transform:uppercase">Sua atendente virtual da Wallue Conecta!</p></div><div class="hero-visual"><img src="https://raw.githubusercontent.com/walluebeautclub2018/Wallue-Conecta--oportunidades-que-criam-conex-es-/main/IMG_8728.jpeg" alt="Apresentação visual da Ana na Wallue Conecta"></div></section>
-<section class="hero" style="display:block;text-align:center;padding:10px 0 0"><h1 style="font-size:clamp(26px,4vw,38px)">Como você quer se conectar?</h1><p style="margin:auto">Escolha o card correspondente ao seu perfil e faça parte dessa rede.</p></section>
-<section class="entry-cards" aria-label="Escolha seu perfil"><article class="entry-card"><div class="entry-art"><img src="https://raw.githubusercontent.com/walluebeautclub2018/Wallue-Conecta--oportunidades-que-criam-conex-es-/main/01-profissionais%20CARD%20DA%20ANA.png" alt="Ana apresenta o cadastro de profissionais"><span class="fix-letter" aria-hidden="true">O</span></div><div class="entry-action"><h2>Profissionais e salões</h2><p>Cadastre seus serviços, apresente seu trabalho e conecte-se a novos clientes.</p><div class="entry-price">R$ 16,99 <small>/ mês</small></div><button type="button" data-profile="professional">Cadastrar profissional</button><button type="button" class="entry-secondary" data-profile="salon">Cadastrar salão</button></div></article><article class="entry-card"><img src="https://raw.githubusercontent.com/walluebeautclub2018/Wallue-Conecta--oportunidades-que-criam-conex-es-/main/02-clientes%20CARD%20DA%20ANA%20CONECTA%202.png" alt="Ana apresenta a área de clientes"><div class="entry-action"><h2>Clientes</h2><p>Busque profissionais por cidade e bairro. Combine o atendimento no estabelecimento, em casa, no escritório ou em outro local previamente acordado.</p><div class="entry-price">R$ 4,99 <small>/ mês</small></div><button type="button" data-profile="client">Acessar como cliente</button></div></article><article class="entry-card"><img src="https://raw.githubusercontent.com/walluebeautclub2018/Wallue-Conecta--oportunidades-que-criam-conex-es-/main/03-conheca-wallue%20CARD%20DA%20ANA%20CONECTA%203.png" alt="Ana apresenta o cadastro de empresas"><div class="entry-action"><h2>Empresas</h2><p>Cadastre sua empresa, publique necessidades e encontre profissionais.</p><div class="entry-price">R$ 16,99 <small>/ mês</small></div><button type="button" data-profile="company">Cadastrar empresa</button></div></article></section>
 <!-- Bloco de explicações repetidas removido: os perfis e seus recursos já são apresentados nas abas acima. -->
 
 <section id="planSelection" class="account-entry" aria-label="Acesso à conta"><h2 style="color:var(--purple);margin:0 0 8px">Já faz parte da Wallue Conecta?</h2><p class="fine">Escolha se deseja criar seu cadastro ou entrar na sua conta.</p><div class="account-entry-actions"><button class="account-create" id="openSignupButton" type="button">Criar conta</button><button class="account-login" id="openLoginButton" type="button">Já possuo conta — Entrar</button></div></section>
@@ -874,9 +871,8 @@ document.querySelectorAll('[data-story-tab]').forEach(tab=>tab.addEventListener(
 (function(){
  const image=document.getElementById('wallueOpeningImage');
  if(!image)return;
- fetch(image.dataset.imageFile,{cache:'no-store'})
-  .then(response=>{if(!response.ok)throw new Error('HTTP '+response.status);return response.text();})
-  .then(data=>{image.src='data:image/webp;base64,'+data.trim();})
+ Promise.all(image.dataset.imageFiles.split(',').map(file=>fetch(file,{cache:'no-store'}).then(response=>{if(!response.ok)throw new Error(file+' HTTP '+response.status);return response.text();})))
+  .then(parts=>{image.src='data:image/webp;base64,'+parts.join('').trim();})
   .catch(error=>{console.error('Falha ao carregar a arte de abertura:',error);image.alt='Arte de abertura indisponível';});
 })();
 </script>
