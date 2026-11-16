@@ -38,6 +38,55 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 .feature-hub .feature-card h3{color:var(--gold)}
 .feature-hub .feature-card p{color:#fff}
 .feature-hub .fine{color:#fff}
+
+/* Correção responsiva da apresentação inicial da Ana — evita sobreposição em celulares e telas estreitas. */
+@media(max-width:900px){
+  .hero#inicio{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) !important;
+    gap:22px !important;
+    width:100%;
+    max-width:100%;
+    padding:24px 0 30px !important;
+    text-align:center !important;
+  }
+  .hero#inicio .hero-copy{
+    width:100%;
+    min-width:0;
+    max-width:100%;
+    text-align:center !important;
+    padding:0 4px;
+  }
+  .hero#inicio h1{
+    max-width:100%;
+    font-size:clamp(30px,7vw,42px) !important;
+    line-height:1.12 !important;
+    overflow-wrap:break-word;
+    word-break:normal;
+  }
+  .hero#inicio .hero-copy p{
+    max-width:100%;
+    margin:0 auto;
+    font-size:clamp(15px,4vw,18px);
+    line-height:1.45;
+  }
+  .hero#inicio .hero-visual{
+    width:100%;
+    max-width:560px;
+    min-width:0;
+    margin:0 auto;
+  }
+  .hero#inicio .hero-visual img{
+    display:block;
+    width:100%;
+    max-width:100%;
+    height:auto;
+  }
+}
+@media(max-width:420px){
+  .hero#inicio h1{font-size:clamp(28px,8vw,34px) !important}
+}
+
 </style>
 </head>
 <body>
