@@ -91,12 +91,14 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 /* Apresentação móvel independente: separa texto e retrato para não sobrepor a arte original. */
 .hero-mobile-card{display:none}
 @media(max-width:760px){
-  main{padding:18px 14px 42px}
+  /* O logo já está dentro do card móvel: evita duplicação do cabeçalho global. */
+  body>header{display:none !important}
+  main{padding:16px 14px 42px}
   .hero#inicio{
     display:block !important;
     width:100%;
     max-width:100%;
-    padding:10px 0 24px !important;
+    padding:8px 0 24px !important;
     margin:0;
   }
   .hero#inicio .hero-copy,
@@ -115,19 +117,20 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
     text-align:left;
     box-shadow:0 12px 28px #32104f24;
   }
-  .hero-mobile-brand{
-    color:var(--gold);
+  .hero#inicio .hero-mobile-brand{
+    color:var(--gold) !important;
     font-size:clamp(22px,6vw,28px);
     font-weight:800;
     letter-spacing:1px;
     line-height:1.15;
   }
-  .hero-mobile-tagline{
-    margin:5px 0 22px;
-    color:#fff;
-    font-size:14px;
+  .hero#inicio .hero-mobile-tagline{
+    margin:5px 0 22px !important;
+    color:#fffaf5 !important;
+    font-size:14px !important;
+    opacity:1 !important;
   }
-  .hero-mobile-card h2{
+  .hero#inicio .hero-mobile-card h2{
     max-width:100%;
     margin:0 0 12px;
     color:#fffaf5;
@@ -136,14 +139,15 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
     letter-spacing:.2px;
     overflow-wrap:normal;
   }
-  .hero-mobile-copy{
+  .hero#inicio .hero-mobile-copy{
     max-width:100%;
-    margin:0 0 18px;
-    color:#fff;
-    font-size:16px;
+    margin:0 0 18px !important;
+    color:#fffaf5 !important;
+    font-size:16px !important;
     line-height:1.45;
+    opacity:1 !important;
   }
-  .hero-mobile-photo{
+  .hero#inicio .hero-mobile-photo{
     width:min(100%,340px);
     aspect-ratio:4/5;
     margin:0 auto 18px;
@@ -153,10 +157,10 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
     background-image:url("https://raw.githubusercontent.com/walluebeautclub2018/Wallue-Conecta--oportunidades-que-criam-conex-es-/main/IMG_8728.jpeg");
     background-repeat:no-repeat;
     background-size:auto 200%;
-    background-position:right 47%;
+    background-position:right top;
     box-shadow:0 8px 22px #12071c55;
   }
-  .hero-mobile-cta{
+  .hero#inicio .hero-mobile-cta{
     display:block;
     width:100%;
     padding:15px 18px;
@@ -168,11 +172,12 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
     text-align:center;
     text-decoration:none;
   }
-  .hero-mobile-note{
-    margin:12px 0 0;
-    color:#fff;
-    font-size:13px;
+  .hero#inicio .hero-mobile-note{
+    margin:12px 0 0 !important;
+    color:#fffaf5 !important;
+    font-size:13px !important;
     text-align:center;
+    opacity:1 !important;
   }
 }
 
