@@ -557,6 +557,8 @@ async function resumeInvitedPaidAccount(){
   await refreshSessionControls();
   document.getElementById('registrationPanel').scrollIntoView({behavior:'smooth',block:'start'});
  }catch(e){
+  const {data:linkedSubscription,error:linkedSubscriptionError}=await supabase.from('wallue_subscriptions').select('id').eq('user_id',session.user.id).eq('status','authorized').or('access_expires_at.is.null,access_expires_at.gt.'+new Date().toISOString()).limit(1).maybeSingle();
+  if(!linkedSubscriptionError&&linkedSubscription)return;
   document.getElementById('registrationPanel').classList.remove('hidden');
   document.getElementById('authForm').classList.remove('hidden');
   document.getElementById('preCheckoutPanel').classList.add('hidden');
