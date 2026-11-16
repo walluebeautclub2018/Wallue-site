@@ -410,7 +410,7 @@ consent_to_data_processing:true
 if(signupPhoto)await savePendingProfilePhoto(email,signupPhoto);
 if(paidRecoveryMode){
  if(!activeSession?.user?.id)throw new Error('Abra o link de recuperação enviado ao seu e-mail antes de concluir o cadastro.');
- result=await supabase.auth.updateUser({password,data:metadata});
+ result=await supabase.auth.updateUser({data:metadata});
 }else{
  result=await supabase.auth.signUp({email,password,options:{emailRedirectTo:location.origin+location.pathname+'?checkout_token='+encodeURIComponent(approvedCheckoutToken),data:metadata}});
 }
