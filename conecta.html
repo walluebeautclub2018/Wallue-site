@@ -169,6 +169,21 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 <article class="feature-card"><div class="feature-icon">✧</div><h3>Oportunidades</h3><p>Consulte oportunidades de trabalho e prestação de serviços ou publique uma necessidade, conforme seu perfil.</p><button type="button" data-hub-login="opportunities">Acessar oportunidades</button></article>
 </div><p class="fine" style="text-align:center">O acesso às funções de publicação e manifestação de interesse exige uma conta confirmada e login.</p>
 </section>
+<section class="panel hidden" id="publicDirectoryPreview" aria-label="Prévia pública de profissionais" style="max-width:1000px;margin:18px auto">
+<div class="feature-actions member-back"><button type="button" id="closePublicDirectory">Voltar</button></div>
+<h2 style="color:var(--purple)">Encontre profissionais</h2>
+<p class="fine">Veja uma prévia dos profissionais cadastrados por especialidade e localidade. Nome, cidade, bairro, especialidade e imagens de trabalho podem aparecer. WhatsApp, endereço e outros contatos privados não são exibidos nesta prévia.</p>
+<div class="feature-form">
+<div class="wide"><label for="publicDirectoryName">Nome do profissional ou salão</label><input id="publicDirectoryName" placeholder="Digite um nome"></div>
+<div><label for="publicDirectoryCity">Cidade</label><input id="publicDirectoryCity" placeholder="Filtrar por cidade"></div>
+<div><label for="publicDirectoryNeighborhood">Bairro</label><input id="publicDirectoryNeighborhood" placeholder="Filtrar por bairro"></div>
+<div class="wide"><label for="publicDirectoryService">Especialidade ou serviço</label><input id="publicDirectoryService" placeholder="Ex.: manicure, cabeleireira"></div>
+</div>
+<div class="feature-actions"><button type="button" id="searchPublicDirectory">🔎 Pesquisar</button></div>
+<div id="publicDirectoryResults" class="feature-list" style="margin-top:14px"></div>
+<div id="publicDirectoryMessage" class="feature-message hidden"></div>
+<div class="feature-item" style="margin-top:16px;text-align:center"><strong>Quer abrir um perfil completo?</strong><p>Crie sua conta ou entre na Wallue Conecta para acessar as funcionalidades reservadas aos participantes.</p><button type="button" id="publicDirectoryLogin" class="primary">Criar conta ou entrar</button></div>
+</section>
 <section class="panel hidden" id="memberHub">
 <h2 style="color:var(--purple);margin-top:0">Meu Espaço Wallue</h2><p id="memberWelcome" class="fine"></p><div style="display:flex;justify-content:flex-end;margin:8px 0 16px"><button type="button" id="memberSignOutButton" style="border:1px solid #d9cddd;border-radius:22px;background:#f1e6d8;color:#32104f;padding:10px 16px;font-weight:700">Sair da conta</button></div><nav class="member-menu" id="memberMenu" aria-label="Menu do Meu Espaço">
 <button type="button" data-member-view="profile">Acessar perfil</button>
@@ -700,7 +715,30 @@ async function openMemberAreas(user,target='auto'){
 }
 document.getElementById('searchDirectory').addEventListener('click',loadDirectory);
 document.getElementById('publishOpportunity').addEventListener('click',async()=>{const btn=document.getElementById('publishOpportunity');btn.disabled=true;try{const title=document.getElementById('oppTitle').value.trim(),description=document.getElementById('oppDescription').value.trim(),category=document.getElementById('oppCategory').value.trim(),city=document.getElementById('oppCity').value.trim();if(title.length<3||description.length<10||category.length<2||city.length<2)throw new Error('Preencha título, descrição, categoria e cidade.');if(!document.getElementById('oppConsent').checked)throw new Error('Autorize a publicação antes de continuar.');const type=document.getElementById('oppType').value;const publisher_type=signedInProfile==='company'?'empresa':'profissional';const {error}=await supabase.from('opportunities').insert({publisher_user_id:signedInUser.id,publisher_type,opportunity_type:type,title,description,category,city,neighborhood:document.getElementById('oppNeighborhood').value.trim()||null,contact_method:'platform',status:'published',consent_to_publish:true});if(error)throw error;showFeatureMessage('publishMessage','Oportunidade publicada com sucesso!');['oppTitle','oppDescription','oppCategory','oppCity','oppNeighborhood'].forEach(id=>document.getElementById(id).value='');document.getElementById('oppConsent').checked=false;await loadOpportunities();}catch(err){showFeatureMessage('publishMessage',err.message||'Não foi possível publicar.',true);}finally{btn.disabled=false;}});
-document.querySelectorAll('[data-hub-login]').forEach(btn=>btn.addEventListener('click',async()=>{requestedHubTarget=btn.dataset.hubLogin||'auto';const {data:{user}}=await supabase.auth.getUser();if(!user){setMode('login');document.getElementById('registrationPanel').scrollIntoView({behavior:'smooth'});message.textContent='Entre na sua conta para acessar '+(requestedHubTarget==='client'?'a busca de profissionais':'as oportunidades')+'.';message.className='message';message.style.display='block';return;}await openMemberAreas(user,requestedHubTarget);}));
+async function loadPublicDirectoryPreview(){
+ const results=document.getElementById('publicDirectoryResults');results.innerHTML='';const messageBox=document.getElementById('publicDirectoryMessage');messageBox.classList.add('hidden');
+ let query=supabase.from('wallue_public_professional_directory').select('user_id,display_name,profile_type,company_name,city,neighborhood,service_interest').order('display_name').limit(100);
+ const name=document.getElementById('publicDirectoryName').value.trim(),city=document.getElementById('publicDirectoryCity').value.trim(),neighborhood=document.getElementById('publicDirectoryNeighborhood').value.trim(),service=document.getElementById('publicDirectoryService').value.trim();
+ if(name)query=query.or('display_name.ilike.%'+name+'%,company_name.ilike.%'+name+'%');if(city)query=query.ilike('city','%'+city+'%');if(neighborhood)query=query.ilike('neighborhood','%'+neighborhood+'%');if(service)query=query.ilike('service_interest','%'+service+'%');
+ const {data,error}=await query;if(error){showFeatureMessage('publicDirectoryMessage','Não foi possível carregar a prévia agora. Tente novamente.',true);return;}
+ if(!data?.length){results.textContent='Nenhum profissional encontrado com esses filtros.';return;}
+ for(const p of data){
+  const card=document.createElement('article');card.className='feature-item';
+  const title=document.createElement('strong');title.textContent=p.display_name||p.company_name||'Profissional Wallue';card.append(title);
+  const specialty=document.createElement('p');specialty.textContent=p.service_interest||(p.profile_type==='salon'?'Salão de beleza':'Profissional');card.append(specialty);
+  const locality=document.createElement('p');locality.textContent=[p.city,p.neighborhood].filter(Boolean).join(' — ');card.append(locality);
+  const kind=document.createElement('p');kind.className='fine';kind.textContent=p.profile_type==='salon'?'Salão':'Profissional autônomo';card.append(kind);
+  const {data:media}=await supabase.from('wallue_profile_media').select('object_path,caption').eq('user_id',p.user_id).eq('is_public',true).eq('media_kind','service').order('created_at',{ascending:false}).limit(3);
+  for(const m of (media||[])){const {data:{publicUrl}}=supabase.storage.from('wallue-public-media').getPublicUrl(m.object_path);const img=document.createElement('img');img.src=publicUrl;img.alt=m.caption||'Prévia de trabalho';img.loading='lazy';img.draggable=false;img.style.cssText='width:100%;max-height:150px;object-fit:cover;border-radius:10px;margin-top:8px;pointer-events:none;user-select:none';card.append(img);}
+  const gate=document.createElement('button');gate.type='button';gate.textContent='Entre para abrir o perfil completo';gate.style.cssText='margin-top:12px;border:1px solid #e4c078;border-radius:24px;background:#f1e6d8;color:#32104f;padding:10px 14px;font-weight:700';gate.addEventListener('click',openPublicDirectoryLogin);card.append(gate);
+  results.append(card);
+ }
+}
+function openPublicDirectoryLogin(){document.getElementById('registrationPanel').classList.remove('hidden');document.getElementById('authForm').classList.remove('hidden');document.getElementById('preCheckoutPanel').classList.add('hidden');setMode('login');selectedPlanNotice.textContent='Entre com seu e-mail e senha para acessar seu perfil completo.';document.getElementById('registrationPanel').scrollIntoView({behavior:'smooth',block:'start'});}
+document.getElementById('searchPublicDirectory').addEventListener('click',loadPublicDirectoryPreview);
+document.getElementById('publicDirectoryLogin').addEventListener('click',openPublicDirectoryLogin);
+document.getElementById('closePublicDirectory').addEventListener('click',()=>document.getElementById('publicDirectoryPreview').classList.add('hidden'));
+document.querySelectorAll('[data-hub-login]').forEach(btn=>btn.addEventListener('click',async()=>{requestedHubTarget=btn.dataset.hubLogin||'auto';const {data:{user}}=await supabase.auth.getUser();if(!user&&requestedHubTarget==='client'){document.getElementById('publicDirectoryPreview').classList.remove('hidden');document.getElementById('publicDirectoryPreview').scrollIntoView({behavior:'smooth',block:'start'});await loadPublicDirectoryPreview();return;}if(!user){setMode('login');document.getElementById('registrationPanel').scrollIntoView({behavior:'smooth'});message.textContent='Entre na sua conta para acessar as oportunidades.';message.className='message';message.style.display='block';return;}await openMemberAreas(user,requestedHubTarget);}));
 
 const mediaMessage=document.getElementById('mediaMessage');
 async function loadMyMedia(){
