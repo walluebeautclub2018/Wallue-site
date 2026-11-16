@@ -191,7 +191,24 @@ document.getElementById('recoverPaidRegistrationButton').addEventListener('click
   const {data,error}=await supabase.functions.invoke('recover-paid-registration',{body:{email}});
   if(error)throw error;
   if(!data?.ok)throw new Error(data?.message||'Não foi possível iniciar a recuperação.');
-  showPreCheckoutMessage(data.message||'Se houver um pagamento autorizado para este e-mail, enviaremos as instruções.');
+  if(data.existing_account){
+    const {data:{session}}=await supabase.auth.getSession();
+    if(session?.user?.email?.toLowerCase()===email){
+      await resumeInvitedPaidAccount();
+    }else{
+      document.getElementById('registrationPanel').classList.remove('hidden');
+      document.getElementById('authForm').classList.remove('hidden');
+      document.getElementById('signupFields').classList.add('hidden');
+      document.getElementById('consentWrap').classList.add('hidden');
+      document.getElementById('preCheckoutPanel').classList.add('hidden');
+      document.getElementById('email').value=email;
+      document.getElementById('email').readOnly=true;
+      setMode('login');
+      showPreCheckoutMessage('O pagamento foi confirmado e este e-mail já possui uma conta. Entre com sua senha. Se não lembrar, use “Esqueci minha senha”. Depois do login, o cadastro pago será retomado sem nova cobrança.');
+    }
+  }else{
+    showPreCheckoutMessage(data.message||'Se houver um pagamento autorizado para este e-mail, enviaremos as instruções.');
+  }
  }catch(e){showPreCheckoutMessage(e.message||'Não foi possível iniciar a recuperação. Tente novamente.',true);}
  finally{button.disabled=false;button.textContent='Já paguei — recuperar meu cadastro';}
 });
@@ -438,6 +455,12 @@ if(result.data.session){form.reset();setMode('login');}
 }else{
 result=await supabase.auth.signInWithPassword({email,password});
 if(result.error) throw result.error;
+await resumeInvitedPaidAccount();
+if(approvedCheckoutToken){
+ message.textContent='Pagamento confirmado. O formulário de conclusão do cadastro foi aberto.';
+ message.className='message';message.style.display='block';
+ return;
+}
 if(approvedCheckoutToken){
  const {data:finalized,error:finalizeError}=await supabase.functions.invoke('finalize-paid-registration',{body:{token:approvedCheckoutToken,user_id:result.data.user.id}});
  if(finalizeError||!finalized?.subscription_linked) throw new Error(finalized?.error||'Não conseguimos concluir o vínculo da assinatura. Procure o suporte antes de iniciar outro pagamento.');
