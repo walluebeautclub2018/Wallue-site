@@ -110,7 +110,7 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 <main>
 <section class="opening-card" id="wallueOpeningCard" aria-label="Abertura da Wallue Conecta">
 <div class="opening-stage">
-<img id="wallueOpeningImage" alt="Wallue Conecta — Ana apresenta as opções para profissionais, clientes e empresas" width="450" height="487" data-image-files="wallue-opening-hires-1.b64,wallue-opening-hires-2.b64,wallue-opening-hires-3.b64,wallue-opening-hires-4.b64">
+<img id="wallueOpeningImage" alt="Wallue Conecta — Ana apresenta as opções para profissionais, clientes e empresas" width="450" height="487" data-image-file="wallue-conecta-abertura.webp.b64">
 <button class="opening-hotspot opening-create" type="button" data-opening-action="create" aria-label="Criar conta"></button>
 <button class="opening-hotspot opening-login" type="button" data-opening-action="login" aria-label="Entrar na conta"></button>
 <button class="opening-hotspot opening-professional" type="button" data-opening-action="professional" aria-label="Cadastrar como profissional"></button>
@@ -909,8 +909,13 @@ document.querySelectorAll('[data-story-tab]').forEach(tab=>tab.addEventListener(
 (function(){
  const image=document.getElementById('wallueOpeningImage');
  if(!image)return;
- Promise.all(image.dataset.imageFiles.split(',').map(file=>fetch(file,{cache:'no-store'}).then(response=>{if(!response.ok)throw new Error(file+' HTTP '+response.status);return response.text();})))
-  .then(parts=>{image.src='data:image/webp;base64,'+parts.join('').trim();})
+ const file=image.dataset.imageFile;
+ fetch('/'+file,{cache:'no-store'})
+  .then(response=>{if(!response.ok)throw new Error(file+' HTTP '+response.status);return response.text();})
+  .then(base64=>{
+    const clean=base64.replace(/\\s/g,'');
+    image.src='data:image/webp;base64,'+clean;
+  })
   .catch(error=>{console.error('Falha ao carregar a arte de abertura:',error);image.alt='Arte de abertura indisponível';});
 })();
 </script>
