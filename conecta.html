@@ -100,8 +100,7 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 .opening-professional{left:3%;top:89%;width:30%;height:5.5%}
 .opening-client{left:34.5%;top:89%;width:30%;height:5.5%}
 .opening-company{left:66.3%;top:89%;width:30.5%;height:5.5%}
-.opening-fallback{margin:10px 0 0;color:#fff;text-align:center;font-size:13px;line-height:1.4}
-@media(max-width:600px){.opening-card{margin:14px auto 22px;padding:6px;border-radius:16px}.opening-stage{border-radius:10px}.opening-fallback{font-size:12px}}
+@media(max-width:600px){.opening-card{margin:14px auto 22px;padding:6px;border-radius:16px}.opening-stage{border-radius:10px}}
 .social-media-strip{margin:34px 0 26px;padding:30px 22px;border:1px solid #eadfcf;border-radius:24px;background:linear-gradient(135deg,#fffaf5,#f1e8f5);text-align:center}.social-media-strip h2{margin:0 0 8px;color:var(--purple);font-family:Georgia,serif;font-size:clamp(25px,4vw,34px)}.social-media-strip>p{max-width:850px;margin:8px auto;color:var(--muted)}.social-media-strip .media-grid{max-width:920px;margin:20px auto}.social-media-strip .media-brand{min-height:100px}.social-media-strip .google-business-icon{display:block;width:42px;height:42px;flex:0 0 42px;object-fit:contain}@media(max-width:600px){.social-media-strip{padding:24px 14px}.social-media-strip .media-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 </head>
@@ -117,7 +116,6 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 <button class="opening-hotspot opening-client" type="button" data-opening-action="client" aria-label="Cadastrar como cliente"></button>
 <button class="opening-hotspot opening-company" type="button" data-opening-action="company" aria-label="Cadastrar como empresa"></button>
 </div>
-<p class="opening-fallback">Use os botões da arte para criar sua conta, entrar ou escolher seu perfil.</p>
 </section>
 <main>
 <!-- Bloco de explicações repetidas removido: os perfis e seus recursos já são apresentados nas abas acima. -->
@@ -463,6 +461,10 @@ function openSignup(profile,planCode,notice){
   document.getElementById('profile').value=profile||'professional';
   syncProfileFields();
   setMode('signup');
+  // O formulário completo permanece bloqueado até o Mercado Pago confirmar o checkout.
+  document.getElementById('authForm').classList.add('hidden');
+  document.getElementById('signupFields').classList.add('hidden');
+  document.getElementById('consentWrap').classList.add('hidden');
   selectedPlanNotice.textContent=notice;
   selectedPlanNotice.style.display='block';
   document.getElementById('registrationPanel').classList.remove('hidden');
@@ -527,10 +529,10 @@ if(authParams.get('reset_password')==='1'){
  document.getElementById('authForm').classList.remove('hidden');
  document.getElementById('preCheckoutPanel').classList.add('hidden');
  document.getElementById('paidCheckoutNotice').classList.add('hidden');
+ document.getElementById('sessionControls').classList.add('hidden');
  setMode('recovery');
  document.getElementById('email').readOnly=true;
- supabase.auth.getUser().then(({data})=>{if(data?.user?.email)document.getElementById('email').value=data.user.email;});
- message.textContent='Link confirmado. Digite sua nova senha e toque em Salvar nova senha.';
+ message.textContent='Validando o link de recuperação…';
  message.className='message';message.style.display='block';
 }
 
@@ -682,12 +684,33 @@ const sessionStatusText=document.getElementById('sessionStatusText');
 async function refreshSessionControls(){
   const {data:{user},error}=await supabase.auth.getUser();
   if(error||!user){sessionControls.classList.add('hidden');sessionControls.style.display='none';return;}
+  if(mode==='recovery'){
+    sessionControls.classList.add('hidden');sessionControls.style.display='none';return;
+  }
   const meta=user.user_metadata||{};
   const hasCompletedProfile=meta.consent_to_data_processing===true&&String(meta.full_name||'').trim().length>=2&&String(meta.city||'').trim().length>=2;
   sessionControls.classList.toggle('hidden',!hasCompletedProfile);
   sessionControls.style.display=hasCompletedProfile?'block':'none';
   if(hasCompletedProfile)sessionStatusText.textContent='Conta conectada ('+user.email+'). Para trocar de conta, saia primeiro.';
 }
+function showPasswordRecovery(session){
+  if(!session?.user){message.textContent='O link de redefinição expirou ou não foi validado. Solicite outro link em Esqueci minha senha.';message.className='message error';message.style.display='block';return;}
+  document.getElementById('registrationPanel').classList.remove('hidden');
+  document.getElementById('preCheckoutPanel').classList.add('hidden');
+  document.getElementById('paidCheckoutNotice').classList.add('hidden');
+  document.getElementById('authForm').classList.remove('hidden');
+  document.getElementById('signupFields').classList.add('hidden');
+  document.getElementById('consentWrap').classList.add('hidden');
+  memberHub.classList.add('hidden');
+  sessionControls.classList.add('hidden');sessionControls.style.display='none';
+  document.getElementById('email').value=session.user.email||'';
+  document.getElementById('email').readOnly=true;
+  setMode('recovery');
+  message.textContent='Link validado. Digite sua nova senha e toque em Salvar nova senha.';
+  message.className='message';message.style.display='block';
+  document.getElementById('registrationPanel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+supabase.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY')showPasswordRecovery(session);});
 async function performSignOut(button){
   button.disabled=true;button.textContent='Saindo…';
   try{
@@ -749,7 +772,8 @@ refreshSessionControls();
 (async()=>{
  if(authParams.get('reset_password')==='1'){
    const {data:{session}}=await supabase.auth.getSession();
-   if(!session){message.textContent='O link de redefinição expirou ou não foi validado. Solicite outro link em Esqueci minha senha.';message.className='message error';message.style.display='block';}
+   if(session)showPasswordRecovery(session);
+   else {message.textContent='O link de redefinição expirou ou não foi validado. Solicite outro link em Esqueci minha senha.';message.className='message error';message.style.display='block';}
  }else{
    await checkReturnedCheckout();
    await resumeInvitedPaidAccount();
@@ -795,8 +819,10 @@ async function openMemberAreas(user,target='auto'){
   signedInUser=user;
   const {data:profile,error}=await supabase.from('wallue_profiles').select('profile_type,full_name,company_name,city,neighborhood,whatsapp,service_interest,instagram_url').eq('user_id',user.id).maybeSingle();
   if(error||!profile){showFeatureMessage('directoryMessage','Seu perfil ainda não está disponível. Entre em contato com o suporte para regularizar o cadastro.',true);return;}
-  const {data:activeSubscription,error:subscriptionError}=await supabase.from('wallue_subscriptions').select('id,status,plan_code,access_expires_at').eq('user_id',user.id).eq('status','authorized').or('access_expires_at.is.null,access_expires_at.gt.'+new Date().toISOString()).order('updated_at',{ascending:false}).limit(1).maybeSingle();
+  const {data:subscriptionRows,error:subscriptionError}=await supabase.from('wallue_subscriptions').select('id,status,plan_code,access_expires_at').eq('user_id',user.id).eq('status','authorized').order('updated_at',{ascending:false}).limit(10);
   if(subscriptionError){message.textContent='Não foi possível confirmar seu pagamento agora. Sua área ficará protegida até a verificação ser concluída.';message.className='message error';message.style.display='block';return;}
+  const now=Date.now();
+  const activeSubscription=(subscriptionRows||[]).find(row=>!row.access_expires_at||Date.parse(row.access_expires_at)>now);
   if(!activeSubscription){
     memberHub.classList.add('hidden');
     checkoutButton.style.display='block';
