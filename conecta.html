@@ -186,7 +186,6 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 </section>
 <section class="panel hidden" id="registrationPanel" aria-label="Cadastro ou entrada">
 <div id="selectedPlanNotice" class="message" style="display:block;margin:0 0 16px">Escolha uma modalidade ou entre na sua conta.</div>
-<div class="tabs"><button id="signupTab" class="active" type="button">Criar conta</button><button id="loginTab" type="button">Entrar</button></div>
 <div id="sessionControls" class="message hidden" role="status" style="margin:12px 0"><span id="sessionStatusText">Você já está conectada a uma conta.</span><button type="button" id="signOutButton" class="secondary" style="display:block;margin-top:10px">Sair da conta</button></div>
 <div id="preCheckoutPanel" class="panel" style="margin:0 0 16px">
 <label for="checkoutProfile">Escolha seu perfil</label>
@@ -310,7 +309,6 @@ const SUPABASE_URL='https://jfpjokqdaobgxfplupqr.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_ZgS9uChB0Kxc3ssWlbb0lQ_q-G97h9c';
 const supabase=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 const form=document.getElementById('authForm'), signupFields=document.getElementById('signupFields');
-const signupTab=document.getElementById('signupTab'),loginTab=document.getElementById('loginTab');
 const submitButton=document.getElementById('submitButton'),message=document.getElementById('message');
 let approvedCheckoutToken='';
 let paidRecoveryMode=new URLSearchParams(location.search).get('paid_recovery')==='1';
@@ -509,8 +507,7 @@ document.getElementById('openLoginButton').addEventListener('click',()=>{
   selectedPlanNotice.textContent='Entre com o e-mail e a senha da sua conta.';
   document.getElementById('registrationPanel').scrollIntoView({behavior:'smooth',block:'start'});
 });
-function setMode(next){mode=next;signupFields.classList.toggle('hidden',mode!=='signup');document.getElementById('consentWrap').classList.toggle('hidden',mode!=='signup');document.getElementById('consent').required=mode==='signup';document.getElementById('fullName').required=mode==='signup';document.getElementById('profile').required=mode==='signup';document.getElementById('city').required=mode==='signup';document.getElementById('whatsapp').required=mode==='signup';syncProfileFields();document.getElementById('companyName').required=mode==='signup'&&document.getElementById('profile').value==='company';document.getElementById('neighborhood').required=mode==='signup'&&document.getElementById('profile').value!=='company';document.getElementById('password').autocomplete=mode==='login'?'current-password':'new-password';submitButton.textContent=mode==='login'?'Entrar':mode==='recovery'?'Salvar nova senha':'Criar minha conta';document.getElementById('forgotPasswordButton').style.display=mode==='login'?'block':'none';signupTab.classList.toggle('active',mode==='signup');loginTab.classList.toggle('active',mode==='login');message.style.display='none'}
-signupTab.addEventListener('click',()=>setMode('signup'));loginTab.addEventListener('click',()=>{selectedPlanCode='';approvedCheckoutToken='';preCheckoutPanel.classList.add('hidden');document.getElementById('authForm').classList.remove('hidden');setMode('login');selectedPlanNotice.textContent='Entre com o e-mail e a senha da sua conta.';});
+function setMode(next){mode=next;signupFields.classList.toggle('hidden',mode!=='signup');document.getElementById('consentWrap').classList.toggle('hidden',mode!=='signup');document.getElementById('consent').required=mode==='signup';document.getElementById('fullName').required=mode==='signup';document.getElementById('profile').required=mode==='signup';document.getElementById('city').required=mode==='signup';document.getElementById('whatsapp').required=mode==='signup';syncProfileFields();document.getElementById('companyName').required=mode==='signup'&&document.getElementById('profile').value==='company';document.getElementById('neighborhood').required=mode==='signup'&&document.getElementById('profile').value!=='company';document.getElementById('password').autocomplete=mode==='login'?'current-password':'new-password';submitButton.textContent=mode==='login'?'Entrar':mode==='recovery'?'Salvar nova senha':'Criar minha conta';document.getElementById('forgotPasswordButton').style.display=mode==='login'?'block':'none';message.style.display='none'}
 document.getElementById('forgotPasswordButton').addEventListener('click',async()=>{
  const email=document.getElementById('email').value.trim().toLowerCase();
  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){message.textContent='Informe seu e-mail para receber o link de redefinição.';message.className='message error';message.style.display='block';return;}
