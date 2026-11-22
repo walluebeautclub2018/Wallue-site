@@ -212,6 +212,26 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 <label for="whatsapp">WhatsApp</label><input id="whatsapp" type="tel" autocomplete="tel" placeholder="(71) 99999-9999" required>
 <div id="instagramField"><label for="instagramUrl">Instagram profissional ou comercial (opcional)</label><input id="instagramUrl" type="url" inputmode="url" placeholder="https://www.instagram.com/seuperfil/"><p class="fine">Informe o link do perfil público que representa seu trabalho ou empresa.</p></div>
 <label for="service" id="serviceLabel">Profissão, serviço ou interesse principal</label><select id="service"><option value="">Selecione uma opção</option><option>Manicure</option><option>Pedicure</option><option>Cabeleireiro(a)</option><option>Barbearia / Barbeiro(a)</option><option>Podologia</option><option>Estética</option><option>Bronzeamento</option><option>Depilação</option><option>Maquiagem</option><option>Design de sobrancelhas</option><option>Massoterapia</option><option>Tranças</option><option>Outro</option></select>
+<div id="clientIntentFields" class="hidden">
+<label for="clientIntent">Qual é o seu objetivo na Wallue Conecta?</label>
+<select id="clientIntent"><option value="beauty_services">Cliente que procura serviços de beleza</option><option value="job_opportunities">Cliente que procura oportunidades de emprego</option></select>
+<div id="jobSeekerFields" class="hidden">
+<label for="candidateJobTitle">Área ou função em que procura oportunidades</label>
+<select id="candidateJobTitle"><option value="">Selecione uma opção</option><option>Diarista</option><option>Auxiliar de limpeza</option><option>Serviços gerais</option><option>Limpeza comercial</option><option>Limpeza residencial</option><option>Organização de eventos</option><option>Auxiliar de eventos</option><option>Limpeza pós-festa</option><option>Conservação e manutenção de ambientes</option><option>Outra função</option></select>
+<label for="candidateExperience">Experiência na área</label>
+<select id="candidateExperience"><option value="">Selecione</option><option>Sem experiência</option><option>Até 1 ano</option><option>De 1 a 3 anos</option><option>De 3 a 5 anos</option><option>Mais de 5 anos</option></select>
+<label for="candidateSkills">Habilidades e serviços que realiza (opcional)</label>
+<input id="candidateSkills" maxlength="500" placeholder="Ex.: limpeza pesada, organização, pós-obra">
+<label for="candidateAvailability">Disponibilidade</label>
+<select id="candidateAvailability"><option value="">Selecione</option><option>Imediata</option><option>Durante a semana</option><option>Finais de semana</option><option>Por diária ou evento</option><option>A combinar</option></select>
+<label for="hasCleaningTeam">Você possui equipe para auxiliar nos serviços de limpeza?</label>
+<select id="hasCleaningTeam"><option value="false">Não</option><option value="true">Sim</option></select>
+<label for="hasMeiCnpj">Você é MEI ou possui CNPJ?</label>
+<select id="hasMeiCnpj"><option value="false">Não</option><option value="true">Sim</option></select>
+<label for="companyDiscoveryConsent">Deseja também ser encontrado por empresas que procuram profissionais?</label>
+<select id="companyDiscoveryConsent"><option value="false">Não</option><option value="true">Sim</option></select>
+<p class="fine">Se escolher Sim, você autoriza a Wallue Conecta a apresentar às empresas cadastradas apenas os dados profissionais informados aqui, sua cidade e sua disponibilidade. Seu WhatsApp e e-mail não serão exibidos nesta busca.</p>
+</div></div>
 </div>
 <label for="email">E-mail</label><input id="email" type="email" autocomplete="email" required>
 <label for="password">Senha (mínimo de 8 caracteres)</label><input id="password" type="password" minlength="8" autocomplete="new-password" required>
@@ -435,8 +455,9 @@ document.getElementById('signupPhoto').addEventListener('change',e=>{const f=e.t
 
 let mode='signup';
 let requestedHubTarget='auto';
-function syncProfileFields(){const selectedProfile=document.getElementById('profile').value;const isCompany=selectedProfile==='company';document.getElementById('instagramField').classList.toggle('hidden',selectedProfile==='client');document.getElementById('companyFields').classList.toggle('hidden',!isCompany);document.getElementById('companyName').required=isCompany;document.getElementById('neighborhood').required=!isCompany;const service=document.getElementById('service');const label=document.getElementById('serviceLabel');const options=isCompany?['Serviços gerais','Diarista','Recepcionista','Motorista','Outro']:['Manicure','Pedicure','Cabeleireiro(a)','Barbearia / Barbeiro(a)','Podologia','Estética','Bronzeamento','Depilação','Maquiagem','Design de sobrancelhas','Massoterapia','Tranças','Outro'];const previous=service.value;label.textContent=isCompany?'Profissão ou serviço que sua empresa procura':'Profissão, serviço ou interesse principal';service.replaceChildren(new Option('Selecione uma opção',''),...options.map(value=>new Option(value,value)));service.value=options.includes(previous)?previous:'';service.required=isCompany;}
-document.getElementById('profile').addEventListener('change',syncProfileFields);
+function syncProfileFields(){const selectedProfile=document.getElementById('profile').value;const isCompany=selectedProfile==='company',isClient=selectedProfile==='client';document.getElementById('instagramField').classList.toggle('hidden',isClient);document.getElementById('companyFields').classList.toggle('hidden',!isCompany);document.getElementById('companyName').required=isCompany;document.getElementById('neighborhood').required=!isCompany;document.getElementById('clientIntentFields').classList.toggle('hidden',!isClient);syncClientIntentFields();const service=document.getElementById('service');const label=document.getElementById('serviceLabel');const intent=document.getElementById('clientIntent').value;const cleaning=['Diarista','Auxiliar de limpeza','Serviços gerais','Limpeza comercial','Limpeza residencial','Organização de eventos','Auxiliar de eventos','Limpeza pós-festa','Conservação e manutenção de ambientes','Outra função'];const beauty=['Manicure','Pedicure','Cabeleireiro(a)','Barbearia / Barbeiro(a)','Podologia','Estética','Bronzeamento','Depilação','Maquiagem','Design de sobrancelhas','Massoterapia','Tranças','Outro'];const options=isCompany?cleaning:(isClient&&intent==='job_opportunities'?cleaning:beauty);const previous=service.value;label.textContent=isCompany?'Profissão ou serviço que sua empresa procura':(isClient&&intent==='job_opportunities'?'Área ou serviço que você oferece':'Profissão, serviço ou interesse principal');service.replaceChildren(new Option('Selecione uma opção',''),...options.map(value=>new Option(value,value)));service.value=options.includes(previous)?previous:'';service.required=isCompany;}
+function syncClientIntentFields(){const isJob=document.getElementById('profile').value==='client'&&document.getElementById('clientIntent').value==='job_opportunities';document.getElementById('jobSeekerFields').classList.toggle('hidden',!isJob);}
+document.getElementById('profile').addEventListener('change',syncProfileFields);\ndocument.getElementById('clientIntent').addEventListener('change',()=>{syncClientIntentFields();syncProfileFields();});
 let selectedPlanCode='';
 const selectedPlanNotice=document.getElementById('selectedPlanNotice');
 document.querySelectorAll('[data-plan]').forEach(button=>button.addEventListener('click',()=>{
@@ -582,7 +603,16 @@ whatsapp,service_interest:service,instagram_url:profile==='client'?null:instagra
 planned_monthly_price_cents:profile==='client'?499:1699,
 plan_code,
 referral_fee_cents:profile==='professional'||profile==='salon'?99:null,
-consent_to_data_processing:true
+consent_to_data_processing:true,
+client_intent:profile==='client'?document.getElementById('clientIntent').value:null,
+has_cleaning_team:profile==='client'&&document.getElementById('clientIntent').value==='job_opportunities'?document.getElementById('hasCleaningTeam').value==='true':false,
+has_mei_or_cnpj:profile==='client'&&document.getElementById('clientIntent').value==='job_opportunities'?document.getElementById('hasMeiCnpj').value==='true':false,
+company_discovery_consent:profile==='client'&&document.getElementById('clientIntent').value==='job_opportunities'?document.getElementById('companyDiscoveryConsent').value==='true':false,
+company_discovery_consent_at:profile==='client'&&document.getElementById('clientIntent').value==='job_opportunities'&&document.getElementById('companyDiscoveryConsent').value==='true'?new Date().toISOString():null,
+candidate_job_title:profile==='client'&&document.getElementById('clientIntent').value==='job_opportunities'?document.getElementById('candidateJobTitle').value:null,
+candidate_experience:profile==='client'&&document.getElementById('clientIntent').value==='job_opportunities'?document.getElementById('candidateExperience').value:null,
+candidate_skills:profile==='client'&&document.getElementById('clientIntent').value==='job_opportunities'?document.getElementById('candidateSkills').value.trim():null,
+candidate_availability:profile==='client'&&document.getElementById('clientIntent').value==='job_opportunities'?document.getElementById('candidateAvailability').value:null
 };
 if(signupPhoto)await savePendingProfilePhoto(email,signupPhoto);
 if(paidRecoveryMode){
