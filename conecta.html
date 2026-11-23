@@ -181,8 +181,9 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 <h2 style="color:var(--purple);margin-top:0">Encaminhamentos transparentes</h2>
 <p>O cliente não paga taxa por encaminhamento. Para o profissional, há duas opções: <strong>R$ 0,99 por encaminhamento válido</strong> ou o <strong>Pacote Promocional de Encaminhamentos por R$ 16,99/mês</strong>, com encaminhamentos ilimitados durante o mês contratado e sem cobrança individual adicional por contato. O encaminhamento avulso só é cobrado quando o cliente solicita o contato, autoriza o compartilhamento e o contato é efetivamente entregue. Busca e visualização de perfil não geram cobrança.</p>
 <p class="fine">Cada encaminhamento será registrado uma única vez. A cobrança automática ainda depende da implementação e dos testes de pagamento; não está ativa.</p>
-<button class="primary" id="referralPackageButton" type="button" disabled aria-disabled="true">Contratação em preparação — indisponível no momento</button>
-<p class="fine">Este é um benefício opcional adicional, exclusivo para profissionais e salões cadastrados. Primeiro, conclua seu cadastro e acesse sua conta. A contratação será liberada quando a integração de cobrança estiver ativada e testada. Nenhum pagamento será iniciado por este botão nesta etapa.</p>
+<button class="primary" id="referralPackageButton" type="button" aria-controls="referralPackageNotice" aria-expanded="false">Consultar disponibilidade do pacote</button>
+<div class="feature-message hidden" id="referralPackageNotice" role="status" aria-live="polite">O pacote está em preparação. Esta consulta não inicia pagamento nem cobrança. A contratação será liberada quando a integração específica estiver concluída e validada.</div>
+<p class="fine">Benefício opcional para profissionais e salões cadastrados. O botão permite consultar a disponibilidade, sem iniciar cobrança nesta etapa.</p>
 </section>
 <section class="panel hidden" id="registrationPanel" aria-label="Cadastro ou entrada">
 <div id="selectedPlanNotice" class="message" style="display:block;margin:0 0 16px">Escolha uma modalidade ou entre na sua conta.</div>
@@ -821,6 +822,23 @@ function showMemberView(view){
   if(view==='menu')return;
   if(view==='profile'){document.getElementById('myProfilePanel').classList.remove('hidden');return;}
   if(view==='edit'){document.getElementById('profileEditPanel').classList.remove('hidden');return;}
+  if(view==='directory'){
+    if(signedInProfile==='client'){
+      document.getElementById('memberDirectory').classList.remove('hidden');
+      document.getElementById('memberInterests').classList.remove('hidden');
+    }
+    return;
+  }
+  if(view==='opportunities'){
+    document.getElementById('memberOpportunities').classList.remove('hidden');
+    if(signedInProfile==='client')document.getElementById('memberInterests').classList.remove('hidden');
+    else{
+      const canPublish=['professional','salon','company'].includes(signedInProfile);
+      document.getElementById('memberReceived').classList.toggle('hidden',!canPublish);
+      document.getElementById('memberInterests').classList.toggle('hidden',signedInProfile==='company');
+    }
+    return;
+  }
   if(view==='area'){
     const role=signedInProfile;
     const canPublish=['professional','salon','company'].includes(role);
@@ -882,13 +900,20 @@ async function openMemberAreas(user,target='auto'){
   // Os atalhos do painel público devem abrir diretamente a ferramenta solicitada
   // depois que o login e a assinatura autorizada forem confirmados.
   if(target==='client'){
-    showMemberView('area');
+    showMemberView('directory');
     document.getElementById('memberDirectory').scrollIntoView({behavior:'smooth',block:'start'});
   }else if(target==='opportunities'){
-    showMemberView('area');
+    showMemberView('opportunities');
     document.getElementById('memberOpportunities').scrollIntoView({behavior:'smooth',block:'start'});
   }
 }
+document.getElementById('referralPackageButton').addEventListener('click',()=>{
+ const notice=document.getElementById('referralPackageNotice');
+ const button=document.getElementById('referralPackageButton');
+ notice.classList.remove('hidden');
+ button.setAttribute('aria-expanded','true');
+ notice.scrollIntoView({behavior:'smooth',block:'nearest'});
+});
 document.getElementById('searchDirectory').addEventListener('click',loadDirectory);
 document.getElementById('publishOpportunity').addEventListener('click',async()=>{const btn=document.getElementById('publishOpportunity');btn.disabled=true;try{const title=document.getElementById('oppTitle').value.trim(),description=document.getElementById('oppDescription').value.trim(),category=document.getElementById('oppCategory').value.trim(),city=document.getElementById('oppCity').value.trim();if(title.length<3||description.length<10||category.length<2||city.length<2)throw new Error('Preencha título, descrição, categoria e cidade.');if(!document.getElementById('oppConsent').checked)throw new Error('Autorize a publicação antes de continuar.');const type=document.getElementById('oppType').value;const publisher_type=signedInProfile==='company'?'empresa':'profissional';const {error}=await supabase.from('opportunities').insert({publisher_user_id:signedInUser.id,publisher_type,opportunity_type:type,title,description,category,city,neighborhood:document.getElementById('oppNeighborhood').value.trim()||null,contact_method:'platform',status:'published',consent_to_publish:true});if(error)throw error;showFeatureMessage('publishMessage','Oportunidade publicada com sucesso!');['oppTitle','oppDescription','oppCategory','oppCity','oppNeighborhood'].forEach(id=>document.getElementById(id).value='');document.getElementById('oppConsent').checked=false;await loadOpportunities();}catch(err){showFeatureMessage('publishMessage',err.message||'Não foi possível publicar.',true);}finally{btn.disabled=false;}});
 async function loadPublicDirectoryPreview(){
