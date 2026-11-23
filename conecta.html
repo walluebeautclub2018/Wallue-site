@@ -860,6 +860,8 @@ document.querySelectorAll('[data-member-view]').forEach(button=>button.addEventL
   if(button.dataset.memberView==='menu')document.getElementById('memberMenu').scrollIntoView({behavior:'smooth',block:'start'});
 }));
 async function openMemberAreas(user,target='auto'){
+  document.getElementById('publicDirectoryPreview').classList.add('hidden');
+  document.getElementById('registrationPanel').classList.add('hidden');
   signedInUser=user;
   const {data:profile,error}=await supabase.from('wallue_profiles').select('profile_type,full_name,company_name,city,neighborhood,whatsapp,service_interest,instagram_url').eq('user_id',user.id).maybeSingle();
   if(error||!profile){showFeatureMessage('directoryMessage','Seu perfil ainda não está disponível. Entre em contato com o suporte para regularizar o cadastro.',true);return;}
@@ -935,7 +937,16 @@ async function loadPublicDirectoryPreview(){
   results.append(card);
  }
 }
-function openPublicDirectoryLogin(){document.getElementById('registrationPanel').classList.remove('hidden');document.getElementById('authForm').classList.remove('hidden');document.getElementById('preCheckoutPanel').classList.add('hidden');setMode('login');selectedPlanNotice.textContent='Entre com seu e-mail e senha para acessar seu perfil completo.';document.getElementById('registrationPanel').scrollIntoView({behavior:'smooth',block:'start'});}
+function openPublicDirectoryLogin(){
+ document.getElementById('publicDirectoryPreview').classList.add('hidden');
+ document.getElementById('memberHub').classList.add('hidden');
+ document.getElementById('registrationPanel').classList.remove('hidden');
+ document.getElementById('authForm').classList.remove('hidden');
+ document.getElementById('preCheckoutPanel').classList.add('hidden');
+ setMode('login');
+ selectedPlanNotice.textContent='Entre com seu e-mail e senha para acessar seu perfil completo.';
+ document.getElementById('registrationPanel').scrollIntoView({behavior:'smooth',block:'start'});
+}
 document.getElementById('searchPublicDirectory').addEventListener('click',loadPublicDirectoryPreview);
 document.getElementById('publicDirectoryLogin').addEventListener('click',openPublicDirectoryLogin);
 document.getElementById('closePublicDirectory').addEventListener('click',()=>document.getElementById('publicDirectoryPreview').classList.add('hidden'));
@@ -943,6 +954,8 @@ document.querySelectorAll('[data-hub-login]').forEach(btn=>btn.addEventListener(
  requestedHubTarget=btn.dataset.hubLogin||'auto';
  const {data:{user}}=await supabase.auth.getUser();
  if(!user&&requestedHubTarget==='client'){
+  document.getElementById('registrationPanel').classList.add('hidden');
+  document.getElementById('memberHub').classList.add('hidden');
   document.getElementById('publicDirectoryPreview').classList.remove('hidden');
   document.getElementById('publicDirectoryPreview').scrollIntoView({behavior:'smooth',block:'start'});
   await loadPublicDirectoryPreview();
