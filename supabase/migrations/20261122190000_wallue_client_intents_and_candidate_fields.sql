@@ -21,7 +21,7 @@ grant select (client_intent, has_cleaning_team, has_mei_or_cnpj, company_discove
   company_discovery_consent_at, candidate_job_title, candidate_experience, candidate_skills,
   candidate_availability) on public.wallue_profiles to authenticated;
 grant update (client_intent, has_cleaning_team, has_mei_or_cnpj, company_discovery_consent,
-  company_discovery_consent_at, candidate_job_title, candidate_experience, candidate_skills,
+  candidate_job_title, candidate_experience, candidate_skills,
   candidate_availability) on public.wallue_profiles to authenticated;
 
 create index if not exists wallue_profiles_candidate_search_idx
