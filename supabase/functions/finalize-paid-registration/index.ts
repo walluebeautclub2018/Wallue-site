@@ -42,7 +42,7 @@ Deno.serve(async req=>{
     has_cleaning_team:expectedProfile==="client"&&metadata.client_intent==="job_opportunities"&&metadata.has_cleaning_team===true,
     has_mei_or_cnpj:expectedProfile==="client"&&metadata.client_intent==="job_opportunities"&&metadata.has_mei_or_cnpj===true,
     company_discovery_consent:expectedProfile==="client"&&metadata.client_intent==="job_opportunities"&&metadata.company_discovery_consent===true,
-    company_discovery_consent_at:expectedProfile==="client"&&metadata.client_intent==="job_opportunities"&&metadata.company_discovery_consent===true&&metadata.company_discovery_consent_at?String(metadata.company_discovery_consent_at):null,
+    company_discovery_consent_at:expectedProfile==="client"&&metadata.client_intent==="job_opportunities"&&metadata.company_discovery_consent===true?new Date().toISOString():null,
     candidate_job_title:expectedProfile==="client"&&metadata.client_intent==="job_opportunities"&&metadata.candidate_job_title?String(metadata.candidate_job_title).slice(0,120):null,
     candidate_experience:expectedProfile==="client"&&metadata.client_intent==="job_opportunities"&&metadata.candidate_experience?String(metadata.candidate_experience).slice(0,60):null,
     candidate_skills:expectedProfile==="client"&&metadata.client_intent==="job_opportunities"&&metadata.candidate_skills?String(metadata.candidate_skills).slice(0,500):null,
