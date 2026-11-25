@@ -50,10 +50,12 @@ Deno.serve(async (req: Request) => {
   try {
     const secret = Deno.env.get("MERCADOPAGO_WEBHOOK_SECRET");
     const referralTestSecret = Deno.env.get("MERCADOPAGO_REFERRAL_TEST_WEBHOOK_SECRET");
+    const referralProductionSecret = Deno.env.get("MERCADOPAGO_REFERRAL_WEBHOOK_SECRET");
     const token = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");
+    const referralProductionToken = Deno.env.get("MERCADOPAGO_REFERRAL_ACCESS_TOKEN");
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    if ((!secret && !referralTestSecret) || !token || !supabaseUrl || !serviceKey) {
+    if ((!secret && !referralTestSecret && !referralProductionSecret) || !token || !supabaseUrl || !serviceKey) {
       console.error("Webhook secrets/configuration missing.");
       return reply(503, { error: "webhook_not_configured" });
     }
@@ -73,7 +75,9 @@ Deno.serve(async (req: Request) => {
     const productionSignatureValid = secret ? await validSignature(req, resourceId, secret) : false;
     const referralTestSignatureValid = referralTestSecret
       ? await validSignature(req, resourceId, referralTestSecret) : false;
-    if (!productionSignatureValid && !referralTestSignatureValid) {
+    const referralProductionSignatureValid = referralProductionSecret
+      ? await validSignature(req, resourceId, referralProductionSecret) : false;
+    if (!productionSignatureValid && !referralTestSignatureValid && !referralProductionSignatureValid) {
       return reply(401, { error: "invalid_signature" });
     }
 
@@ -117,13 +121,25 @@ Deno.serve(async (req: Request) => {
         .maybeSingle();
       if (knownCreditError) return reply(500, { error: "credit_order_environment_lookup_failed" });
       const referralTestToken = Deno.env.get("MERCADOPAGO_REFERRAL_TEST_ACCESS_TOKEN");
-      const preferredToken = knownCreditOrder?.provider_environment === "test" && referralTestToken
-        ? referralTestToken : token;
+      const preferredToken = knownCreditOrder?.provider_environment === "production" && referralProductionToken
+        ? referralProductionToken
+        : knownCreditOrder?.provider_environment === "test" && referralTestToken
+          ? referralTestToken : token;
       let response = await fetch(`https://api.mercadopago.com/v1/orders/${encodeURIComponent(resourceId)}`, {
         headers: { Authorization: `Bearer ${preferredToken}` },
       });
-      // Recover test orders whose provider_order_id was not saved after MP created the order.
-      if (!response.ok && preferredToken === token && referralTestToken) {
+      // Recovery for orders created before the provider order ID was persisted.
+      if (!response.ok && preferredToken !== token) {
+        response = await fetch(`https://api.mercadopago.com/v1/orders/${encodeURIComponent(resourceId)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+      if (!response.ok && preferredToken !== referralProductionToken && referralProductionToken) {
+        response = await fetch(`https://api.mercadopago.com/v1/orders/${encodeURIComponent(resourceId)}`, {
+          headers: { Authorization: `Bearer ${referralProductionToken}` },
+        });
+      }
+      if (!response.ok && preferredToken !== referralTestToken && referralTestToken) {
         response = await fetch(`https://api.mercadopago.com/v1/orders/${encodeURIComponent(resourceId)}`, {
           headers: { Authorization: `Bearer ${referralTestToken}` },
         });
