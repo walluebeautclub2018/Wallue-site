@@ -45,12 +45,13 @@ Deno.serve(async (req: Request) => {
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    const mpToken = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");
-    const environment = (Deno.env.get("MERCADOPAGO_ENVIRONMENT") ?? "").trim().toLowerCase();
+    const environment = (Deno.env.get("MERCADOPAGO_REFERRAL_ENVIRONMENT") ?? "test").trim().toLowerCase();
+    const mpToken = environment === "test"
+      ? Deno.env.get("MERCADOPAGO_REFERRAL_TEST_ACCESS_TOKEN")
+      : Deno.env.get("MERCADOPAGO_REFERRAL_ACCESS_TOKEN");
     if (!supabaseUrl || !serviceKey || !mpToken) return respond({ error: "server_not_configured" }, 503);
     if (environment !== "test") return respond({ error: "referral_credits_test_environment_only" }, 503);
-    if (environment === "test" && !mpToken.startsWith("TEST-")) return respond({ error: "test_access_token_required" }, 503);
-    if (environment === "production" && !mpToken.startsWith("APP_USR-")) return respond({ error: "production_access_token_required" }, 503);
+    if (!mpToken.startsWith("TEST-")) return respond({ error: "test_access_token_required" }, 503);
 
     const admin = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
     const jwt = authorization.slice(7);
@@ -104,6 +105,7 @@ Deno.serve(async (req: Request) => {
         amount_cents: product.amountCents,
         currency: "BRL",
         status: "creating",
+        provider_environment: environment,
         external_reference: externalReference,
       })
       .select("id")
