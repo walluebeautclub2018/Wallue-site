@@ -154,7 +154,13 @@ Deno.serve(async (req: Request) => {
 
         const orderProcessed = String(order.status ?? "") === "processed";
         if (orderProcessed && Math.round(paidAmount * 100) === creditPurchase.amount_cents &&
-            approvedPayments.length > 0) {
+            approvedPayments.length === 1) {
+          const individualPaid = Number(approvedPayments[0].amount ?? approvedPayments[0].paid_amount ??
+            approvedPayments[0].transaction_amount ?? order.total_paid_amount);
+          if (!Number.isFinite(individualPaid) || Math.round(individualPaid * 100) !== creditPurchase.amount_cents) {
+            console.error("Referral credit individual payment amount mismatch", { orderId, individualPaid });
+            return reply(409, { error: "credit_payment_amount_mismatch" });
+          }
           const paymentIds = approvedPayments.map((payment) => String(payment.id));
           const paidAt = toIso(order.last_updated_date) ?? new Date().toISOString();
           const { data: appliedRows, error: applyError } = await admin.rpc(
@@ -183,12 +189,18 @@ Deno.serve(async (req: Request) => {
         }
         // Não deixa esta ordem cair no fluxo de checkout/assinatura mensal.
         if (notificationId) {
+          const isSettled = orderProcessed && Math.round(paidAmount * 100) === creditPurchase.amount_cents &&
+            approvedPayments.length === 1;
           const { error: doneError } = await admin.from("wallue_mercadopago_webhook_events")
-            .update({ processing_status: "processed", processed_at: new Date().toISOString(), last_error_code: null })
+            .update({
+              processing_status: isSettled ? "processed" : "received",
+              processed_at: isSettled ? new Date().toISOString() : null,
+              last_error_code: null
+            })
             .eq("provider_notification_id", notificationId);
           if (doneError) return reply(500, { error: "event_completion_failed" });
         }
-        return reply(200, { received: true, processed: true, credit_purchase: true });
+        return reply(200, { received: true, processed: orderProcessed, credit_purchase: true });
       }
 
       const { data: pending, error: pendingError } = await admin
