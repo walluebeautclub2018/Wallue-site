@@ -13,6 +13,10 @@ alter table public.referral_events
   add constraint referral_events_fee_amount_cents_check
   check (fee_amount_cents in (99, 229));
 
+-- Novas indicações passam a nascer com o valor vigente; linhas antigas continuam em 99.
+alter table public.referral_events
+  alter column fee_amount_cents set default 229;
+
 -- Uma compra representa exclusivamente um produto de créditos, nunca uma assinatura.
 create table if not exists public.wallue_referral_credit_purchases (
   id uuid primary key default gen_random_uuid(),
