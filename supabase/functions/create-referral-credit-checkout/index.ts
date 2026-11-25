@@ -28,7 +28,7 @@ Deno.serve(async (req: Request) => {
 
   try {
     // Feature flag isolada: nunca reutiliza WALLUE_BILLING_ENABLED.
-    if (Deno.env.get("WALLUE_REFERRAL_CREDITS_ENABLED") !== "true") {
+    if (Deno.env.get("WALLUE_REFERRAL_CREDITS_ENABLED") !== "test") {
       return json({ error: "referral_credits_not_enabled" }, 503);
     }
 
@@ -40,7 +40,7 @@ Deno.serve(async (req: Request) => {
     const mpToken = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");
     const environment = (Deno.env.get("MERCADOPAGO_ENVIRONMENT") ?? "").trim().toLowerCase();
     if (!supabaseUrl || !serviceKey || !mpToken) return json({ error: "server_not_configured" }, 503);
-    if (environment !== "test" && environment !== "production") return json({ error: "invalid_mercadopago_environment" }, 503);
+    if (environment !== "test") return json({ error: "referral_credits_test_environment_only" }, 503);
     if (environment === "test" && !mpToken.startsWith("TEST-")) return json({ error: "test_access_token_required" }, 503);
     if (environment === "production" && !mpToken.startsWith("APP_USR-")) return json({ error: "production_access_token_required" }, 503);
 
