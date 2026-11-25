@@ -19,7 +19,7 @@ const PRODUCTS = {
 } as const;
 
 function validEmail(value: string) {
-  return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value);
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
 Deno.serve(async (req: Request) => {
