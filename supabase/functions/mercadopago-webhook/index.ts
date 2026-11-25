@@ -106,9 +106,24 @@ Deno.serve(async (req: Request) => {
     }
 
     if (eventType === "order") {
-      const response = await fetch(`https://api.mercadopago.com/v1/orders/${encodeURIComponent(resourceId)}`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const { data: knownCreditOrder, error: knownCreditError } = await admin
+        .from("wallue_referral_credit_purchases")
+        .select("provider_environment")
+        .eq("provider_order_id", resourceId)
+        .maybeSingle();
+      if (knownCreditError) return reply(500, { error: "credit_order_environment_lookup_failed" });
+      const referralTestToken = Deno.env.get("MERCADOPAGO_REFERRAL_TEST_ACCESS_TOKEN");
+      const preferredToken = knownCreditOrder?.provider_environment === "test" && referralTestToken
+        ? referralTestToken : token;
+      let response = await fetch(`https://api.mercadopago.com/v1/orders/${encodeURIComponent(resourceId)}`, {
+        headers: { Authorization: `Bearer ${preferredToken}` },
       });
+      // Recover test orders whose provider_order_id was not saved after MP created the order.
+      if (!response.ok && preferredToken === token && referralTestToken) {
+        response = await fetch(`https://api.mercadopago.com/v1/orders/${encodeURIComponent(resourceId)}`, {
+          headers: { Authorization: `Bearer ${referralTestToken}` },
+        });
+      }
       if (!response.ok) {
         console.error("Order lookup failed:", response.status);
         return reply(502, { error: "order_lookup_failed" });
