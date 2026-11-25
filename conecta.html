@@ -319,37 +319,27 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 </section>
 <section id="regras-faq" class="social-media-strip" aria-label="Regras e perguntas frequentes">
  <h2>Informações importantes para usar a Wallue Conecta</h2>
- <p>Selecione um dos cards para consultar as orientações.</p>
- <div class="feature-cards info-cards" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin:18px auto">
-  <article class="feature-card"><h3>Regras para utilização</h3><p>Conheça as condições de participação, divulgação e conexão.</p><button type="button" class="info-card-button" data-info-panel="regras-utilizacao">Consultar regras</button></article>
-  <article class="feature-card"><h3>Perguntas e Respostas (FAQ)</h3><p>Respostas sobre cadastro, contatos, créditos e oportunidades.</p><button type="button" class="info-card-button" data-info-panel="perguntas-frequentes">Ver perguntas</button></article>
-  <article class="feature-card"><h3>Segurança e Privacidade</h3><p>Entenda como protegemos os dados dos associados.</p><button type="button" class="info-card-button" data-info-panel="seguranca-privacidade">Ver orientações</button></article>
+ <div class="feature-cards info-card-grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin:18px 0">
+  <article class="feature-card"><h3>Regras para utilização</h3><p>Conheça as condições de participação, divulgação e conexão.</p><button class="info-card-button" type="button" data-info-open="regras-utilizacao" aria-controls="regras-utilizacao" aria-expanded="false">Consultar regras</button></article>
+  <article class="feature-card"><h3>Perguntas e Respostas (FAQ)</h3><p>Respostas sobre cadastro, contatos, créditos e oportunidades.</p><button class="info-card-button" type="button" data-info-open="perguntas-frequentes" aria-controls="perguntas-frequentes" aria-expanded="false">Ver perguntas</button></article>
+  <article class="feature-card"><h3>Segurança e Privacidade</h3><p>Entenda como protegemos os dados dos associados.</p><button class="info-card-button" type="button" data-info-open="seguranca-privacidade" aria-controls="seguranca-privacidade" aria-expanded="false">Ver orientações</button></article>
  </div>
- <div id="regras-utilizacao" class="feature-panel info-panel" hidden style="text-align:left">
-  <h3>Regras para utilização da plataforma</h3><ul>
-   <li>Forneça informações verdadeiras e mantenha seu cadastro atualizado.</li>
-   <li>Respeite clientes, profissionais, empresas e demais associados.</li>
-   <li>Não publique telefone, WhatsApp, e-mail, QR Code ou links de contato em fotos, artes ou materiais de divulgação.</li>
-   <li>Não exponha dados pessoais de clientes ou terceiros sem autorização.</li>
-   <li>Imagens e conteúdos podem ser recusados ou removidos quando violarem estas regras.</li>
-   <li>A Wallue Conecta aproxima pessoas e oportunidades, mas não garante contratação, quantidade de contatos ou resultado financeiro.</li>
-   <li>Um crédito libera um contato elegível, não garante contratação.</li>
-  </ul><button type="button" class="info-close-button">Fechar</button>
- </div>
- <div id="perguntas-frequentes" class="feature-panel info-panel" hidden style="text-align:left">
-  <h3>Perguntas e Respostas (FAQ)</h3>
+ <div id="regras-utilizacao" class="feature-panel info-panel" style="text-align:left" hidden><h3>Regras para utilização da plataforma</h3><ul>
+  <li>Forneça informações verdadeiras e mantenha seu cadastro atualizado.</li><li>Respeite clientes, profissionais, empresas e demais associados.</li>
+  <li>Não publique telefone, WhatsApp, e-mail, QR Code ou links de contato em fotos, artes ou materiais de divulgação.</li>
+  <li>Não exponha dados pessoais de clientes ou terceiros sem autorização.</li><li>Imagens e conteúdos podem ser recusados ou removidos quando violarem estas regras.</li>
+  <li>A Wallue Conecta aproxima pessoas e oportunidades, mas não garante contratação, quantidade de contatos ou resultado financeiro.</li><li>Um crédito libera um contato elegível, não garante contratação.</li>
+ </ul><button type="button" class="info-close-button" data-info-close>Fechar</button></div>
+ <div id="perguntas-frequentes" class="feature-panel info-panel" style="text-align:left" hidden><h3>Perguntas e Respostas (FAQ)</h3>
   <details><summary>Quem pode se cadastrar?</summary><p>Clientes, profissionais autônomos, proprietários de salão e empresas, conforme as opções de cadastro e planos disponíveis.</p></details>
   <details><summary>Meu telefone, WhatsApp e e-mail ficam públicos?</summary><p>Não. Dados privados não devem aparecer nos cards públicos nem nas imagens. O compartilhamento segue o fluxo autorizado da plataforma.</p></details>
   <details><summary>Posso colocar meu WhatsApp ou e-mail nas fotos?</summary><p>Não. Imagens com telefone, WhatsApp, e-mail, QR Code ou links de contato são proibidas e podem ser reprovadas ou removidas.</p></details>
   <details><summary>O que posso publicar no meu perfil?</summary><p>Imagens e informações relacionadas aos serviços e trabalhos realizados, respeitando as regras de conteúdo, privacidade e autorização de uso de imagem.</p></details>
   <details><summary>O crédito garante que vou conseguir um cliente?</summary><p>Não. O crédito permite desbloquear um contato elegível, mas não garante resposta, contratação ou prestação do serviço.</p></details>
   <details><summary>Como funciona a relação depois da conexão?</summary><p>A Wallue Conecta facilita a aproximação. A negociação e a execução do serviço são tratadas diretamente entre as partes.</p></details>
-  <button type="button" class="info-close-button">Fechar</button>
+  <button type="button" class="info-close-button" data-info-close>Fechar</button>
  </div>
- <div id="seguranca-privacidade" class="feature-panel info-panel" hidden style="text-align:left">
-  <h3>Segurança e Privacidade</h3><p>Não compartilhe senhas ou códigos de acesso. Não publique dados pessoais em imagens. Denuncie conteúdos que exponham informações privadas. Os dados de contato são compartilhados somente pelo fluxo autorizado da plataforma.</p>
-  <button type="button" class="info-close-button">Fechar</button>
- </div>
+ <div id="seguranca-privacidade" class="feature-panel info-panel" style="text-align:left" hidden><h3>Segurança e privacidade</h3><p>Não compartilhe senhas ou códigos de acesso. Não publique dados pessoais em imagens. Denuncie conteúdos que exponham informações privadas.</p><button type="button" class="info-close-button" data-info-close>Fechar</button></div>
 </section>
 <section class="social-media-strip" id="redes-sociais" aria-label="Canais oficiais de divulgação da Wallue Conecta">
 <h2>Encontre a Wallue Conecta nas mídias sociais</h2>
@@ -1151,6 +1141,16 @@ document.querySelectorAll('[data-opening-action]').forEach(button=>button.addEve
 }));
 
 document.querySelectorAll('[data-story-tab]').forEach(tab=>tab.addEventListener('click',()=>{const key=tab.dataset.storyTab;document.querySelectorAll('[data-story-tab]').forEach(item=>{const active=item===tab;item.classList.toggle('active',active);item.setAttribute('aria-selected',active?'true':'false');});document.querySelectorAll('.story-panel').forEach(panel=>{const active=panel.id==='story-panel-'+key;panel.hidden=!active;panel.classList.toggle('active',active);});}));
+document.querySelectorAll('[data-info-open]').forEach(button=>button.addEventListener('click',()=>{
+ const targetId=button.dataset.infoOpen;
+ document.querySelectorAll('#regras-faq .info-panel').forEach(panel=>{panel.hidden=panel.id!==targetId;});
+ document.querySelectorAll('#regras-faq [data-info-open]').forEach(item=>item.setAttribute('aria-expanded',item===button?'true':'false'));
+ document.getElementById(targetId)?.scrollIntoView({behavior:'smooth',block:'start'});
+}));
+document.querySelectorAll('#regras-faq [data-info-close]').forEach(button=>button.addEventListener('click',()=>{
+ document.querySelectorAll('#regras-faq .info-panel').forEach(panel=>panel.hidden=true);
+ document.querySelectorAll('#regras-faq [data-info-open]').forEach(item=>item.setAttribute('aria-expanded','false'));
+}));
 </script>
 
 </body>
