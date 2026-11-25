@@ -103,7 +103,15 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 @media(max-width:600px){.opening-card{margin:14px auto 22px;padding:6px;border-radius:16px}.opening-stage{border-radius:10px}}
 .social-media-strip{margin:34px 0 26px;padding:30px 22px;border:1px solid #eadfcf;border-radius:24px;background:linear-gradient(135deg,#fffaf5,#f1e8f5);text-align:center}.social-media-strip h2{margin:0 0 8px;color:var(--purple);font-family:Georgia,serif;font-size:clamp(25px,4vw,34px)}.social-media-strip>p{max-width:850px;margin:8px auto;color:var(--muted)}.social-media-strip .media-grid{max-width:920px;margin:20px auto}.social-media-strip .media-brand{min-height:100px}.social-media-strip .google-business-icon{display:block;width:42px;height:42px;flex:0 0 42px;object-fit:contain}@media(max-width:600px){.social-media-strip{padding:24px 14px}.social-media-strip .media-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
-</head>
+<style id="wallue-info-cards-uniform">
+#regras-faq .info-card-button,#regras-faq .info-close-button{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:11px 22px;border:1px solid var(--gold);border-radius:28px;background:var(--gold);color:#32104f;font:700 15px Arial,sans-serif;text-decoration:none;cursor:pointer}
+#regras-faq .info-card-button:hover,#regras-faq .info-close-button:hover{filter:brightness(.96)}
+#regras-faq .info-panel[hidden]{display:none}
+#regras-faq .info-panel{scroll-margin-top:24px}
+#regras-faq .info-panel details{padding:12px 0;border-bottom:1px solid #eadfcf}
+#regras-faq .info-panel summary{color:var(--purple);font-weight:700;cursor:pointer}
+#regras-faq .info-panel details p{margin:8px 0 0}
+</style></head>
 <body>
 <header><strong>WALLUE CONECTA</strong><span>Conexões que transformam</span></header>
 <main>
@@ -178,11 +186,12 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 
 
 <section class="panel" style="margin:0 auto 24px;max-width:980px">
-<h2 style="color:var(--purple);margin-top:0">Encaminhamentos transparentes</h2>
-<p>O cliente não paga taxa por encaminhamento. Para o profissional, há duas opções: <strong>R$ 0,99 por encaminhamento válido</strong> ou o <strong>Pacote Promocional de Encaminhamentos por R$ 16,99/mês</strong>, com encaminhamentos ilimitados durante o mês contratado e sem cobrança individual adicional por contato. O encaminhamento avulso só é cobrado quando o cliente solicita o contato, autoriza o compartilhamento e o contato é efetivamente entregue. Busca e visualização de perfil não geram cobrança.</p>
-<p class="fine">Cada encaminhamento será registrado uma única vez. A cobrança automática ainda depende da implementação e dos testes de pagamento; não está ativa.</p>
-<button class="primary" id="referralPackageButton" type="button" disabled aria-disabled="true">Contratação em preparação — indisponível no momento</button>
-<p class="fine">Este é um benefício opcional adicional, exclusivo para profissionais e salões cadastrados. Primeiro, conclua seu cadastro e acesse sua conta. A contratação será liberada quando a integração de cobrança estiver ativada e testada. Nenhum pagamento será iniciado por este botão nesta etapa.</p>
+<h2 style="color:var(--purple);margin-top:0">Carteira de créditos para conexões</h2>
+<p>O cliente não paga para solicitar um serviço. Para profissionais e salões, o desbloqueio de cada contato autorizado custa <strong>R$ 2,29 por indicação</strong>. Também haverá o <strong>pacote de 12 créditos por R$ 16,99</strong>.</p>
+<p class="fine">Um crédito libera um contato. Os créditos são pré-pagos e não expiram enquanto não forem utilizados. A compra não garante quantidade de clientes ou contratações. A busca e a visualização de perfis continuam gratuitas.</p>
+<button class="primary" id="referralPackageButton" type="button" aria-controls="referralPackageNotice" aria-expanded="false">Conhecer a carteira de créditos</button>
+<div class="feature-message hidden" id="referralPackageNotice" role="status" aria-live="polite">Carteira Wallue: R$ 2,29 por desbloqueio ou pacote com 12 créditos por R$ 16,99. A contratação ficará disponível após a validação final do checkout e do webhook do Mercado Pago. Nenhuma cobrança é iniciada por esta consulta.</div>
+<p class="fine">Disponível para profissionais e salões associados. A assinatura mensal da plataforma continua separada da compra de créditos.</p>
 </section>
 <section class="panel hidden" id="registrationPanel" aria-label="Cadastro ou entrada">
 <div id="selectedPlanNotice" class="message" style="display:block;margin:0 0 16px">Escolha uma modalidade ou entre na sua conta.</div>
@@ -212,6 +221,26 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 <label for="whatsapp">WhatsApp</label><input id="whatsapp" type="tel" autocomplete="tel" placeholder="(71) 99999-9999" required>
 <div id="instagramField"><label for="instagramUrl">Instagram profissional ou comercial (opcional)</label><input id="instagramUrl" type="url" inputmode="url" placeholder="https://www.instagram.com/seuperfil/"><p class="fine">Informe o link do perfil público que representa seu trabalho ou empresa.</p></div>
 <label for="service" id="serviceLabel">Profissão, serviço ou interesse principal</label><select id="service"><option value="">Selecione uma opção</option><option>Manicure</option><option>Pedicure</option><option>Cabeleireiro(a)</option><option>Barbearia / Barbeiro(a)</option><option>Podologia</option><option>Estética</option><option>Bronzeamento</option><option>Depilação</option><option>Maquiagem</option><option>Design de sobrancelhas</option><option>Massoterapia</option><option>Tranças</option><option>Outro</option></select>
+<div id="clientIntentFields" class="hidden">
+<label for="clientIntent">Qual é o seu objetivo na Wallue Conecta?</label>
+<select id="clientIntent"><option value="beauty_services">Cliente que procura serviços de beleza</option><option value="job_opportunities">Cliente que procura oportunidades de emprego</option></select>
+<div id="jobSeekerFields" class="hidden">
+<label for="candidateJobTitle">Área ou função em que procura oportunidades</label>
+<select id="candidateJobTitle"><option value="">Selecione uma opção</option><option>Diarista</option><option>Auxiliar de limpeza</option><option>Serviços gerais</option><option>Limpeza comercial</option><option>Limpeza residencial</option><option>Organização de eventos</option><option>Auxiliar de eventos</option><option>Limpeza pós-festa</option><option>Conservação e manutenção de ambientes</option><option>Outra função</option></select>
+<label for="candidateExperience">Experiência na área</label>
+<select id="candidateExperience"><option value="">Selecione</option><option>Sem experiência</option><option>Até 1 ano</option><option>De 1 a 3 anos</option><option>De 3 a 5 anos</option><option>Mais de 5 anos</option></select>
+<label for="candidateSkills">Habilidades e serviços que realiza (opcional)</label>
+<input id="candidateSkills" maxlength="500" placeholder="Ex.: limpeza pesada, organização, pós-obra">
+<label for="candidateAvailability">Disponibilidade</label>
+<select id="candidateAvailability"><option value="">Selecione</option><option>Imediata</option><option>Durante a semana</option><option>Finais de semana</option><option>Por diária ou evento</option><option>A combinar</option></select>
+<label for="hasCleaningTeam">Você possui equipe para auxiliar nos serviços de limpeza?</label>
+<select id="hasCleaningTeam"><option value="false">Não</option><option value="true">Sim</option></select>
+<label for="hasMeiCnpj">Você é MEI ou possui CNPJ?</label>
+<select id="hasMeiCnpj"><option value="false">Não</option><option value="true">Sim</option></select>
+<label for="companyDiscoveryConsent">Deseja também ser encontrado por empresas que procuram profissionais?</label>
+<select id="companyDiscoveryConsent"><option value="false">Não</option><option value="true">Sim</option></select>
+<p class="fine">Se escolher Sim, você autoriza a Wallue Conecta a apresentar às empresas cadastradas apenas os dados profissionais informados aqui, sua cidade e sua disponibilidade. Seu WhatsApp e e-mail não serão exibidos nesta busca.</p>
+</div></div>
 </div>
 <label for="email">E-mail</label><input id="email" type="email" autocomplete="email" required>
 <label for="password">Senha (mínimo de 8 caracteres)</label><input id="password" type="password" minlength="8" autocomplete="new-password" required>
@@ -247,11 +276,25 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 <button type="button" data-member-view="profile">Acessar perfil</button>
 <button type="button" data-member-view="edit">Atualizar cadastro</button>
 <button type="button" data-member-view="area" id="memberAreaButton">Área de divulgação e conexões</button>
+<button type="button" data-member-view="wallet" id="memberWalletButton" class="hidden">Carteira de créditos</button>
 </nav>
+<section class="feature-panel hidden" id="creditWalletPanel">
+<div class="feature-actions member-back"><button type="button" data-member-view="menu">Voltar ao menu</button></div>
+<h3>Minha carteira de créditos</h3>
+<p class="fine">Use créditos para desbloquear contatos de clientes que autorizaram o compartilhamento. Um crédito libera um contato.</p>
+<div class="feature-item"><strong>Saldo disponível</strong><div id="creditWalletBalance" style="font-size:30px;font-weight:800;color:var(--purple)">— créditos</div><p class="fine" id="creditWalletStatus">Consultando sua carteira…</p></div>
+<div class="feature-actions"><button type="button" id="buyCreditPackButton" class="primary">Comprar 12 créditos — R$ 16,99</button></div>
+<h4 style="color:var(--purple)">Indicações disponíveis para desbloqueio</h4>
+<div id="chargeableReferrals" class="feature-list"></div>
+<div id="creditWalletMessage" class="feature-message hidden" role="status" aria-live="polite"></div>
+<p class="fine">Créditos pré-pagos não expiram enquanto não utilizados. A compra não garante volume de indicações. A assinatura mensal da plataforma é independente.</p>
+</section>
 <section class="feature-panel hidden" id="myProfilePanel"><h3>Meu perfil</h3><p class="fine">Confira as informações apresentadas no seu perfil Wallue.</p><div id="profilePreview" class="feature-item"></div><div class="feature-actions member-back"><button type="button" data-member-view="menu">Voltar ao menu</button></div></section>
 <section class="feature-panel hidden" id="profileEditPanel"><h3>Atualizar cadastro</h3><p class="fine">Altere seus dados e salve as atualizações.</p><div class="feature-form"><div><label for="editFullName">Nome completo</label><input id="editFullName" maxlength="120"></div><div id="editCompanyWrap" class="hidden"><label for="editCompanyName">Nome da empresa</label><input id="editCompanyName" maxlength="150"></div><div><label for="editCity">Cidade</label><input id="editCity" maxlength="100"></div><div><label for="editNeighborhood">Bairro</label><input id="editNeighborhood" maxlength="100"></div><div><label for="editWhatsapp">WhatsApp</label><input id="editWhatsapp" type="tel" maxlength="20"></div><div><label for="editService">Profissão, serviço ou interesse</label><input id="editService" maxlength="150"></div><div class="wide" id="editInstagramWrap"><label for="editInstagram">Instagram (opcional)</label><input id="editInstagram" type="url" placeholder="https://www.instagram.com/seuperfil/"></div></div><div class="feature-actions"><button type="button" id="saveProfileButton">Salvar alterações</button><button type="button" data-member-view="menu">Voltar ao menu</button></div><div id="profileEditMessage" class="feature-message hidden"></div></section><section class="panel hidden" id="mediaPanel"><div class="feature-actions member-back"><button type="button" data-member-view="menu">Voltar ao menu</button></div>
 <h2>Meu perfil e minhas fotos</h2>
-<p class="fine">A foto de perfil é separada do limite. Você pode manter até <strong>3 imagens de serviços</strong> no perfil e substituir qualquer uma a qualquer momento, sem esperar o mês seguinte. Para trocar uma foto, exclua a antiga e envie a nova; o arquivo excluído também será removido do armazenamento. As imagens publicadas ficam visíveis ao público.</p>
+<p class="fine">A foto de perfil é separada do limite. Você pode manter até <strong>3 imagens de serviços</strong> no perfil e substituir qualquer uma a qualquer momento, sem esperar o mês seguinte. Para trocar uma foto, exclua a antiga e envie a nova; o arquivo excluído também será removido do armazenamento. As imagens aprovadas ficam visíveis ao público.</p>
+<div class="feature-message" style="background:#fff7e8;border:1px solid #e4c078;color:#32104f"><strong>Regras obrigatórias para imagens de divulgação</strong><ul><li>Não inclua telefone, WhatsApp, e-mail, QR Code, links ou qualquer dado de contato na imagem.</li><li>Não publique dados pessoais de clientes ou terceiros sem autorização.</li><li>Imagens com informações de contato não serão aceitas para divulgação e poderão ser reprovadas na análise.</li><li>O contato entre clientes e profissionais deve começar pelos recursos da Wallue Conecta. Dados privados não ficam expostos nos cards públicos.</li></ul><span class="fine">A verificação automática de texto em imagens ainda será implantada; até lá, a aplicação desta regra depende de revisão antes da aprovação.</span></div>
+<label style="display:flex;gap:8px;align-items:flex-start;font-weight:400"><input id="mediaRulesConsent" type="checkbox" style="width:auto;margin-top:4px"><span>Confirmo que esta imagem não contém telefone, WhatsApp, e-mail, QR Code, links ou dados de contato e que tenho autorização para divulgar a imagem.</span></label>
 <p class="fine" id="serviceMediaCount" aria-live="polite">Imagens de serviços: carregando…</p>
 <label for="mediaKind">Tipo de imagem</label>
 <select id="mediaKind"><option value="profile">Foto de perfil</option><option value="service">Foto de serviço / portfólio</option></select>
@@ -273,6 +316,30 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 <article class="feature-card"><div class="feature-icon">✦</div><h3>Encontrar profissionais</h3><p>Pesquise profissionais de beleza e serviços por atividade e localização. Conheça seus perfis e trabalhos publicados.</p><button type="button" data-hub-login="client">Acessar busca de profissionais</button></article>
 <article class="feature-card"><div class="feature-icon">✧</div><h3>Oportunidades</h3><p>Consulte oportunidades de trabalho e prestação de serviços ou publique uma necessidade, conforme seu perfil.</p><button type="button" data-hub-login="opportunities">Acessar oportunidades</button></article>
 </div><p class="fine" style="text-align:center">O acesso às funções de publicação e manifestação de interesse exige uma conta confirmada e login.</p>
+</section>
+<section id="regras-faq" class="social-media-strip" aria-label="Regras e perguntas frequentes">
+ <h2>Informações importantes para usar a Wallue Conecta</h2>
+ <div class="feature-cards info-card-grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin:18px 0">
+  <article class="feature-card"><h3>Regras para utilização</h3><p>Conheça as condições de participação, divulgação e conexão.</p><button class="info-card-button" type="button" data-info-open="regras-utilizacao" aria-controls="regras-utilizacao" aria-expanded="false">Consultar regras</button></article>
+  <article class="feature-card"><h3>Perguntas e Respostas (FAQ)</h3><p>Respostas sobre cadastro, contatos, créditos e oportunidades.</p><button class="info-card-button" type="button" data-info-open="perguntas-frequentes" aria-controls="perguntas-frequentes" aria-expanded="false">Ver perguntas</button></article>
+  <article class="feature-card"><h3>Segurança e Privacidade</h3><p>Entenda como protegemos os dados dos associados.</p><button class="info-card-button" type="button" data-info-open="seguranca-privacidade" aria-controls="seguranca-privacidade" aria-expanded="false">Ver orientações</button></article>
+ </div>
+ <div id="regras-utilizacao" class="feature-panel info-panel" style="text-align:left" hidden><h3>Regras para utilização da plataforma</h3><ul>
+  <li>Forneça informações verdadeiras e mantenha seu cadastro atualizado.</li><li>Respeite clientes, profissionais, empresas e demais associados.</li>
+  <li>Não publique telefone, WhatsApp, e-mail, QR Code ou links de contato em fotos, artes ou materiais de divulgação.</li>
+  <li>Não exponha dados pessoais de clientes ou terceiros sem autorização.</li><li>Imagens e conteúdos podem ser recusados ou removidos quando violarem estas regras.</li>
+  <li>A Wallue Conecta aproxima pessoas e oportunidades, mas não garante contratação, quantidade de contatos ou resultado financeiro.</li><li>Um crédito libera um contato elegível, não garante contratação.</li>
+ </ul><button type="button" class="info-close-button" data-info-close>Fechar</button></div>
+ <div id="perguntas-frequentes" class="feature-panel info-panel" style="text-align:left" hidden><h3>Perguntas e Respostas (FAQ)</h3>
+  <details><summary>Quem pode se cadastrar?</summary><p>Clientes, profissionais autônomos, proprietários de salão e empresas, conforme as opções de cadastro e planos disponíveis.</p></details>
+  <details><summary>Meu telefone, WhatsApp e e-mail ficam públicos?</summary><p>Não. Dados privados não devem aparecer nos cards públicos nem nas imagens. O compartilhamento segue o fluxo autorizado da plataforma.</p></details>
+  <details><summary>Posso colocar meu WhatsApp ou e-mail nas fotos?</summary><p>Não. Imagens com telefone, WhatsApp, e-mail, QR Code ou links de contato são proibidas e podem ser reprovadas ou removidas.</p></details>
+  <details><summary>O que posso publicar no meu perfil?</summary><p>Imagens e informações relacionadas aos serviços e trabalhos realizados, respeitando as regras de conteúdo, privacidade e autorização de uso de imagem.</p></details>
+  <details><summary>O crédito garante que vou conseguir um cliente?</summary><p>Não. O crédito permite desbloquear um contato elegível, mas não garante resposta, contratação ou prestação do serviço.</p></details>
+  <details><summary>Como funciona a relação depois da conexão?</summary><p>A Wallue Conecta facilita a aproximação. A negociação e a execução do serviço são tratadas diretamente entre as partes.</p></details>
+  <button type="button" class="info-close-button" data-info-close>Fechar</button>
+ </div>
+ <div id="seguranca-privacidade" class="feature-panel info-panel" style="text-align:left" hidden><h3>Segurança e privacidade</h3><p>Não compartilhe senhas ou códigos de acesso. Não publique dados pessoais em imagens. Denuncie conteúdos que exponham informações privadas.</p><button type="button" class="info-close-button" data-info-close>Fechar</button></div>
 </section>
 <section class="social-media-strip" id="redes-sociais" aria-label="Canais oficiais de divulgação da Wallue Conecta">
 <h2>Encontre a Wallue Conecta nas mídias sociais</h2>
@@ -303,6 +370,17 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 <footer><strong>WALLUE CONECTA</strong><div>Conexões que transformam.</div><p style="margin:14px auto 0;font-size:14px;line-height:1.6">Dúvidas ou precisa de ajuda? Fale com nossa equipe:<br><a href="mailto:suporte.conecta@wallue.com.br" style="color:inherit;font-weight:700;text-decoration:underline">suporte.conecta@wallue.com.br</a></p></footer>
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+document.querySelectorAll('#regras-faq [data-info-panel]').forEach(button=>{
+ button.addEventListener('click',()=>{
+  const target=document.getElementById(button.dataset.infoPanel);
+  const wasOpen=target&&!target.hidden;
+  document.querySelectorAll('#regras-faq .info-panel').forEach(panel=>panel.hidden=true);
+  if(target&&!wasOpen){target.hidden=false;target.scrollIntoView({behavior:'smooth',block:'start'});}
+ });
+});
+document.querySelectorAll('#regras-faq .info-close-button').forEach(button=>button.addEventListener('click',()=>{
+ const panel=button.closest('.info-panel');if(panel)panel.hidden=true;
+}));
 const SUPABASE_URL='https://jfpjokqdaobgxfplupqr.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_ZgS9uChB0Kxc3ssWlbb0lQ_q-G97h9c';
 const supabase=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
@@ -435,8 +513,10 @@ document.getElementById('signupPhoto').addEventListener('change',e=>{const f=e.t
 
 let mode='signup';
 let requestedHubTarget='auto';
-function syncProfileFields(){const selectedProfile=document.getElementById('profile').value;const isCompany=selectedProfile==='company';document.getElementById('instagramField').classList.toggle('hidden',selectedProfile==='client');document.getElementById('companyFields').classList.toggle('hidden',!isCompany);document.getElementById('companyName').required=isCompany;document.getElementById('neighborhood').required=!isCompany;const service=document.getElementById('service');const label=document.getElementById('serviceLabel');const options=isCompany?['Serviços gerais','Diarista','Recepcionista','Motorista','Outro']:['Manicure','Pedicure','Cabeleireiro(a)','Barbearia / Barbeiro(a)','Podologia','Estética','Bronzeamento','Depilação','Maquiagem','Design de sobrancelhas','Massoterapia','Tranças','Outro'];const previous=service.value;label.textContent=isCompany?'Profissão ou serviço que sua empresa procura':'Profissão, serviço ou interesse principal';service.replaceChildren(new Option('Selecione uma opção',''),...options.map(value=>new Option(value,value)));service.value=options.includes(previous)?previous:'';service.required=isCompany;}
+function syncProfileFields(){const selectedProfile=document.getElementById('profile').value;const isCompany=selectedProfile==='company',isClient=selectedProfile==='client';document.getElementById('instagramField').classList.toggle('hidden',isClient);document.getElementById('companyFields').classList.toggle('hidden',!isCompany);document.getElementById('companyName').required=isCompany;document.getElementById('neighborhood').required=!isCompany;document.getElementById('clientIntentFields').classList.toggle('hidden',!isClient);syncClientIntentFields();const service=document.getElementById('service');const label=document.getElementById('serviceLabel');const intent=document.getElementById('clientIntent').value;const cleaning=['Diarista','Auxiliar de limpeza','Serviços gerais','Limpeza comercial','Limpeza residencial','Organização de eventos','Auxiliar de eventos','Limpeza pós-festa','Conservação e manutenção de ambientes','Outra função'];const beauty=['Manicure','Pedicure','Cabeleireiro(a)','Barbearia / Barbeiro(a)','Podologia','Estética','Bronzeamento','Depilação','Maquiagem','Design de sobrancelhas','Massoterapia','Tranças','Outro'];const options=isCompany?cleaning:(isClient&&intent==='job_opportunities'?cleaning:beauty);const previous=service.value;label.textContent=isCompany?'Profissão ou serviço que sua empresa procura':(isClient&&intent==='job_opportunities'?'Área ou serviço que você oferece':'Profissão, serviço ou interesse principal');service.replaceChildren(new Option('Selecione uma opção',''),...options.map(value=>new Option(value,value)));service.value=options.includes(previous)?previous:'';service.required=isCompany;}
+function syncClientIntentFields(){const isJob=document.getElementById('profile').value==='client'&&document.getElementById('clientIntent').value==='job_opportunities';document.getElementById('jobSeekerFields').classList.toggle('hidden',!isJob);}
 document.getElementById('profile').addEventListener('change',syncProfileFields);
+document.getElementById('clientIntent').addEventListener('change',()=>{syncClientIntentFields();syncProfileFields();});
 let selectedPlanCode='';
 const selectedPlanNotice=document.getElementById('selectedPlanNotice');
 document.querySelectorAll('[data-plan]').forEach(button=>button.addEventListener('click',()=>{
@@ -581,8 +661,17 @@ city,neighborhood:profile==='company'?'':document.getElementById('neighborhood')
 whatsapp,service_interest:service,instagram_url:profile==='client'?null:instagramUrl,
 planned_monthly_price_cents:profile==='client'?499:1699,
 plan_code,
-referral_fee_cents:profile==='professional'||profile==='salon'?99:null,
-consent_to_data_processing:true
+referral_fee_cents:profile==='professional'||profile==='salon'?229:null,
+consent_to_data_processing:true,
+client_intent:profile==='client'?document.getElementById('clientIntent').value:null,
+has_cleaning_team:profile==='client'&&document.getElementById('clientIntent').value==='job_opportunities'?document.getElementById('hasCleaningTeam').value==='true':false,
+has_mei_or_cnpj:profile==='client'&&document.getElementById('clientIntent').value==='job_opportunities'?document.getElementById('hasMeiCnpj').value==='true':false,
+company_discovery_consent:profile==='client'&&document.getElementById('clientIntent').value==='job_opportunities'?document.getElementById('companyDiscoveryConsent').value==='true':false,
+company_discovery_consent_at:profile==='client'&&document.getElementById('clientIntent').value==='job_opportunities'&&document.getElementById('companyDiscoveryConsent').value==='true'?new Date().toISOString():null,
+candidate_job_title:profile==='client'&&document.getElementById('clientIntent').value==='job_opportunities'?document.getElementById('candidateJobTitle').value:null,
+candidate_experience:profile==='client'&&document.getElementById('clientIntent').value==='job_opportunities'?document.getElementById('candidateExperience').value:null,
+candidate_skills:profile==='client'&&document.getElementById('clientIntent').value==='job_opportunities'?document.getElementById('candidateSkills').value.trim():null,
+candidate_availability:profile==='client'&&document.getElementById('clientIntent').value==='job_opportunities'?document.getElementById('candidateAvailability').value:null
 };
 if(signupPhoto)await savePendingProfilePhoto(email,signupPhoto);
 if(paidRecoveryMode){
@@ -781,15 +870,36 @@ async function loadDirectory(){const results=document.getElementById('directoryR
 async function loadOpportunities(){const results=document.getElementById('opportunityResults');results.innerHTML='';const {data,error}=await supabase.from('opportunities').select('id,publisher_user_id,opportunity_type,title,description,category,city,neighborhood,created_at').eq('status','published').order('created_at',{ascending:false}).limit(100);if(error){showFeatureMessage('opportunityMessage','Não foi possível carregar as oportunidades.',true);return;}if(!data?.length){results.textContent='Ainda não há oportunidades publicadas. Volte em breve!';return;}for(const o of data){const card=document.createElement('article');card.className='feature-item';card.innerHTML='<strong>'+esc(o.title)+'</strong><p>'+esc(o.description)+'</p><p><b>'+esc(o.category||o.opportunity_type)+'</b> · '+esc(o.city)+(o.neighborhood?' — '+esc(o.neighborhood):'')+'</p><p class="fine">'+new Date(o.created_at).toLocaleDateString('pt-BR')+'</p>';if(o.publisher_user_id!==signedInUser.id){const btn=document.createElement('button');btn.type='button';btn.textContent='Tenho interesse';btn.addEventListener('click',async()=>{const shareProfile=confirm('Deseja autorizar que quem publicou esta oportunidade veja seu nome, cidade e tipo de perfil? Se escolher Cancelar, seu interesse será enviado sem identificar você.');const shareContact=shareProfile&&confirm('Deseja também autorizar o compartilhamento do seu WhatsApp para facilitar o contato?');btn.disabled=true;const {error:ie}=await supabase.from('opportunity_interests').insert({opportunity_id:o.id,interested_user_id:signedInUser.id,share_profile:shareProfile,share_contact:shareContact});btn.disabled=false;if(ie){btn.textContent=ie.code==='23505'?'Interesse já enviado':'Tentar novamente';showFeatureMessage('opportunityMessage',ie.code==='23505'?'Você já demonstrou interesse nesta oportunidade.':'Não foi possível enviar seu interesse.',ie.code!=='23505');}else{btn.textContent='Interesse enviado';showFeatureMessage('opportunityMessage','Seu interesse foi registrado. A empresa ou responsável poderá consultar sua manifestação.');}});card.append(btn);}results.append(card);}}
 async function loadReceivedInterests(){const el=document.getElementById('receivedResults');el.innerHTML='';const {data,error}=await supabase.rpc('get_received_opportunity_interests');if(error){el.textContent='Não foi possível carregar os interesses recebidos.';return;}if(!data?.length){el.textContent='Ainda não há manifestações de interesse nas suas publicações.';return;}for(const item of data){const c=document.createElement('article');c.className='feature-item';let contact=item.applicant_whatsapp?'<p><strong>Contato autorizado:</strong> '+esc(item.applicant_whatsapp)+'</p><p><a href="https://wa.me/'+esc(item.applicant_whatsapp.replace(/\\D/g,''))+'" target="_blank" rel="noopener">Conversar pelo WhatsApp</a></p>':'<p class="fine">A pessoa ainda não autorizou compartilhar o WhatsApp. Você pode responder pela plataforma quando essa função estiver disponível.</p>';c.innerHTML='<strong>'+esc(item.opportunity_title||'Oportunidade')+'</strong><p>Interessado(a): '+esc(item.applicant_name||'Membro Wallue')+'</p><p>'+esc(item.applicant_profile_type||'')+' · '+esc(item.applicant_city||'')+(item.applicant_neighborhood?' — '+esc(item.applicant_neighborhood):'')+'</p>'+contact+'<p class="fine">Interesse recebido · '+new Date(item.interest_created_at).toLocaleDateString('pt-BR')+'</p>';el.append(c);}}
 async function loadMyInterests(){const el=document.getElementById('interestResults');el.innerHTML='';const {data,error}=await supabase.from('opportunity_interests').select('id,status,created_at,opportunities(title,city,category)').eq('interested_user_id',signedInUser.id).order('created_at',{ascending:false}).limit(50);if(error){el.textContent='Não foi possível carregar suas manifestações.';return;}if(!data?.length){el.textContent='Você ainda não demonstrou interesse em oportunidades.';return;}for(const item of data){const c=document.createElement('article');c.className='feature-item';c.innerHTML='<strong>'+esc(item.opportunities?.title||'Oportunidade')+'</strong><p>'+esc(item.opportunities?.category||'')+' · '+esc(item.opportunities?.city||'')+'</p><p class="fine">Situação: '+esc(item.status)+'</p>';el.append(c);}}
-async function renderProfilePreview(p){const box=document.getElementById('profilePreview');box.innerHTML='';const {data:m}=await supabase.from('wallue_profile_media').select('object_path').eq('user_id',signedInUser.id).eq('media_kind','profile').eq('is_public',true).order('created_at',{ascending:false}).limit(1).maybeSingle();if(m?.object_path){const {data:{publicUrl}}=supabase.storage.from('wallue-public-media').getPublicUrl(m.object_path);const img=document.createElement('img');img.src=publicUrl;img.alt='Foto de perfil';img.style.cssText='width:88px;height:88px;object-fit:cover;border-radius:50%;float:left;margin:0 12px 8px 0';box.append(img);}const n=document.createElement('strong');n.textContent=p.company_name||p.full_name||'Perfil Wallue';const d=document.createElement('p');d.textContent=(p.service_interest||'Associado Wallue')+' · '+(p.city||'')+(p.neighborhood?' — '+p.neighborhood:'');box.append(n,d);if(p.instagram_url){const a=document.createElement('a');a.href=p.instagram_url;a.target='_blank';a.rel='noopener noreferrer';a.textContent='Ver Instagram';box.append(a);}const note=document.createElement('p');note.className='fine';note.textContent='Seu WhatsApp e e-mail não aparecem nesta prévia pública.';box.append(note);}
+async function renderProfilePreview(p){const box=document.getElementById('profilePreview');box.innerHTML='';const {data:m}=await supabase.from('wallue_profile_media').select('object_path').eq('user_id',signedInUser.id).eq('media_kind','profile').eq('is_public',true).order('created_at',{ascending:false}).limit(1).maybeSingle();if(m?.object_path){const {data:{publicUrl}}=supabase.storage.from('wallue-public-media').getPublicUrl(m.object_path);const img=document.createElement('img');img.src=publicUrl;img.alt='Foto de perfil';img.style.cssText='width:88px;height:88px;object-fit:cover;border-radius:50%;float:left;margin:0 12px 8px 0';box.append(img);}const n=document.createElement('strong');n.textContent=p.company_name||p.full_name||'Perfil Wallue';const d=document.createElement('p');d.textContent=(p.service_interest||'Associado Wallue')+' · '+(p.city||'')+(p.neighborhood?' — '+p.neighborhood:'');box.append(n,d);if(['professional','salon'].includes(signedInProfile)){const wallet=document.createElement('div');wallet.className='feature-item';wallet.style.cssText='clear:both;margin-top:14px;border:1px solid #d8c8ec;border-radius:12px;padding:12px';const label=document.createElement('strong');label.textContent='Minha carteira Wallue';const balance=document.createElement('div');balance.id='profileCreditBalance';balance.style.cssText='font-size:24px;font-weight:800;color:var(--purple);margin:5px 0';balance.textContent='Consultando…';const link=document.createElement('button');link.type='button';link.className='primary';link.textContent='Ver carteira e desbloquear contatos';link.addEventListener('click',()=>showMemberView('wallet'));wallet.append(label,balance,link);box.append(wallet);refreshCreditBalance();}if(p.instagram_url){const a=document.createElement('a');a.href=p.instagram_url;a.target='_blank';a.rel='noopener noreferrer';a.textContent='Ver Instagram';box.append(a);}const note=document.createElement('p');note.className='fine';note.textContent='Seu WhatsApp e e-mail não aparecem nesta prévia pública.';box.append(note);}
 document.getElementById('saveProfileButton').addEventListener('click',async()=>{const b=document.getElementById('saveProfileButton'),m=document.getElementById('profileEditMessage');b.disabled=true;try{const full_name=document.getElementById('editFullName').value.trim(),city=document.getElementById('editCity').value.trim(),whatsapp=document.getElementById('editWhatsapp').value.trim(),instagram_url=document.getElementById('editInstagram').value.trim();if(full_name.length<2||city.length<2)throw new Error('Informe nome completo e cidade.');const digits=whatsapp.replace(/\\D/g,'');if(digits.length<10||digits.length>15)throw new Error('Informe um WhatsApp válido com DDD.');if(instagram_url){const u=new URL(instagram_url);if(!['instagram.com','www.instagram.com'].includes(u.hostname.toLowerCase()))throw new Error('Informe um link válido do Instagram.');}const patch={full_name,city,neighborhood:document.getElementById('editNeighborhood').value.trim()||null,whatsapp,service_interest:document.getElementById('editService').value.trim()||null,instagram_url:instagram_url||null,updated_at:new Date().toISOString()};if(signedInProfile==='company')patch.company_name=document.getElementById('editCompanyName').value.trim();const {error}=await supabase.from('wallue_profiles').update(patch).eq('user_id',signedInUser.id);if(error)throw error;const {data:p,error:re}=await supabase.from('wallue_profiles').select('profile_type,full_name,company_name,city,neighborhood,service_interest,instagram_url').eq('user_id',signedInUser.id).single();if(re)throw re;await renderProfilePreview(p);m.textContent='Perfil atualizado com sucesso.';m.classList.remove('hidden','error');}catch(e){m.textContent=e.message||'Não foi possível salvar.';m.classList.remove('hidden');m.classList.add('error');}finally{b.disabled=false;}});
 
 function showMemberView(view){
-  const panels=['myProfilePanel','profileEditPanel','mediaPanel','memberDirectory','memberOpportunities','memberInterests','memberReceived'];
+  const panels=['myProfilePanel','profileEditPanel','mediaPanel','memberDirectory','memberOpportunities','memberInterests','memberReceived','creditWalletPanel'];
   panels.forEach(id=>document.getElementById(id)?.classList.add('hidden'));
+  // Fecha fluxos públicos e de cadastro ao navegar dentro da área autenticada.
+  document.getElementById('registrationPanel')?.classList.add('hidden');
+  document.getElementById('publicDirectoryPreview')?.classList.add('hidden');
   if(view==='menu')return;
+  if(view==='wallet'){if(['professional','salon'].includes(signedInProfile)){document.getElementById('creditWalletPanel').classList.remove('hidden');loadCreditWallet();}return;}
   if(view==='profile'){document.getElementById('myProfilePanel').classList.remove('hidden');return;}
   if(view==='edit'){document.getElementById('profileEditPanel').classList.remove('hidden');return;}
+  if(view==='directory'){
+    if(signedInProfile==='client'){
+      document.getElementById('memberDirectory').classList.remove('hidden');
+      document.getElementById('memberInterests').classList.remove('hidden');
+    }
+    return;
+  }
+  if(view==='opportunities'){
+    document.getElementById('memberOpportunities').classList.remove('hidden');
+    if(signedInProfile==='client')document.getElementById('memberInterests').classList.remove('hidden');
+    else{
+      const canPublish=['professional','salon','company'].includes(signedInProfile);
+      document.getElementById('memberReceived').classList.toggle('hidden',!canPublish);
+      document.getElementById('memberInterests').classList.toggle('hidden',signedInProfile==='company');
+    }
+    return;
+  }
   if(view==='area'){
     const role=signedInProfile;
     const canPublish=['professional','salon','company'].includes(role);
@@ -811,6 +921,8 @@ document.querySelectorAll('[data-member-view]').forEach(button=>button.addEventL
   if(button.dataset.memberView==='menu')document.getElementById('memberMenu').scrollIntoView({behavior:'smooth',block:'start'});
 }));
 async function openMemberAreas(user,target='auto'){
+  document.getElementById('publicDirectoryPreview').classList.add('hidden');
+  document.getElementById('registrationPanel').classList.add('hidden');
   signedInUser=user;
   const {data:profile,error}=await supabase.from('wallue_profiles').select('profile_type,full_name,company_name,city,neighborhood,whatsapp,service_interest,instagram_url').eq('user_id',user.id).maybeSingle();
   if(error||!profile){showFeatureMessage('directoryMessage','Seu perfil ainda não está disponível. Entre em contato com o suporte para regularizar o cadastro.',true);return;}
@@ -837,6 +949,7 @@ async function openMemberAreas(user,target='auto'){
   document.getElementById('mediaPanel').classList.toggle('hidden',!['professional','salon'].includes(profile.profile_type));
   document.getElementById('opportunityComposer').classList.toggle('hidden',!canPublish);
   document.getElementById('memberAreaButton').textContent=profile.profile_type==='client'?'Área de conexões':'Área de divulgação';
+  document.getElementById('memberWalletButton').classList.toggle('hidden',!['professional','salon'].includes(profile.profile_type));
   if(['professional','salon'].includes(profile.profile_type)){await uploadPendingProfilePhoto(user);await loadMyMedia();}
   await renderProfilePreview(profile);
   const profileLabels={client:'Cliente',professional:'Profissional',salon:'Salão de beleza',company:'Empresa'};
@@ -851,13 +964,71 @@ async function openMemberAreas(user,target='auto'){
   // Os atalhos do painel público devem abrir diretamente a ferramenta solicitada
   // depois que o login e a assinatura autorizada forem confirmados.
   if(target==='client'){
-    showMemberView('area');
+    showMemberView('directory');
     document.getElementById('memberDirectory').scrollIntoView({behavior:'smooth',block:'start'});
   }else if(target==='opportunities'){
-    showMemberView('area');
+    showMemberView('opportunities');
     document.getElementById('memberOpportunities').scrollIntoView({behavior:'smooth',block:'start'});
   }
 }
+async function refreshCreditBalance(){
+ const {data:ledger,error}=await supabase.from('wallue_referral_credit_ledger').select('credits_delta').eq('user_id',signedInUser.id);
+ if(error)throw error;
+ const total=Math.max(0,(ledger||[]).reduce((sum,row)=>sum+Number(row.credits_delta||0),0));
+ const label=total+' '+(total===1?'crédito disponível':'créditos disponíveis');
+ const profileBalance=document.getElementById('profileCreditBalance');if(profileBalance)profileBalance.textContent=label;
+ const walletBalance=document.getElementById('creditWalletBalance');if(walletBalance)walletBalance.textContent=label;
+ return total;
+}
+async function loadCreditWallet(){
+ const status=document.getElementById('creditWalletStatus');
+ const list=document.getElementById('chargeableReferrals');
+ const message=document.getElementById('creditWalletMessage');
+ status.textContent='Atualizando saldo';list.innerHTML='';
+ try{
+  const total=await refreshCreditBalance();
+  status.textContent='Créditos disponíveis para desbloqueios';
+  const {data:events,error:eventError}=await supabase.from('referral_events')
+   .select('id,referral_key,created_at,fee_amount_cents,status,chargeable_at')
+   .eq('professional_user_id',signedInUser.id).eq('status','chargeable')
+   .eq('fee_amount_cents',229).eq('currency','BRL').is('paid_at',null)
+   .order('chargeable_at',{ascending:true}).limit(30);
+  if(eventError)throw eventError;
+  if(!events?.length){list.innerHTML='<p class="fine">Nenhuma indicação disponível para desbloqueio no momento.</p>';return;}
+  list.innerHTML=events.map(event=>'<div class="feature-item"><strong>Indicação disponível</strong><p class="fine">Um crédito libera este contato.</p><button type="button" class="primary" data-unlock-referral="'+esc(event.id)+'">'+(total>0?'Usar 1 crédito':'Comprar desbloqueio — R$ 2,29')+'</button></div>').join('');
+  list.querySelectorAll('[data-unlock-referral]').forEach(button=>button.addEventListener('click',()=>total>0?consumeReferralCredit(button.dataset.unlockReferral,button):startCreditCheckout('single_referral',button.dataset.unlockReferral,button)));
+ }catch(error){status.textContent='Não foi possível consultar o saldo.';message.textContent=error.message||'Erro ao consultar carteira.';message.classList.remove('hidden');message.classList.add('error');}
+}
+async function consumeReferralCredit(referralId,button){
+ const message=document.getElementById('creditWalletMessage');button.disabled=true;const old=button.textContent;button.textContent='Desbloqueando contato…';
+ try{
+  const {data,error}=await supabase.functions.invoke('consume-referral-credit',{body:{referral_event_id:referralId}});
+  if(error)throw error;if(!data?.unlocked)throw new Error(data?.error||'Não foi possível desbloquear este contato.');
+  await loadCreditWallet();
+  const c=data.contact;
+  if(c?.whatsapp){const digits=String(c.whatsapp).replace(/\\D/g,'');const a=document.createElement('a');a.href='https://wa.me/'+digits;a.target='_blank';a.rel='noopener noreferrer';a.textContent='Abrir WhatsApp de '+(c.name||'cliente');a.className='primary';message.innerHTML='';message.append(document.createTextNode('Contato desbloqueado. '),a);message.classList.remove('hidden','error');}
+  else{message.textContent='O crédito foi utilizado, mas os dados de contato precisam ser conferidos pelo suporte.';message.classList.remove('hidden');message.classList.add('error');}
+ }catch(error){message.textContent=error.message||'Não foi possível usar o crédito.';message.classList.remove('hidden');message.classList.add('error');button.disabled=false;button.textContent=old;}
+}
+async function startCreditCheckout(kind,referralId,button){
+ const message=document.getElementById('creditWalletMessage');
+ button.disabled=true;const old=button.textContent;button.textContent='Preparando pagamento…';
+ try{
+  const {data,error}=await supabase.functions.invoke('create-referral-credit-checkout',{body:{purchase_kind:kind,...(referralId?{referral_event_id:referralId}:{})}});
+  if(error)throw error;
+  if(!data?.checkout_url)throw new Error(data?.error||'O Mercado Pago não retornou o link de pagamento.');
+  location.assign(data.checkout_url);
+ }catch(error){message.textContent=error.message||'Não foi possível iniciar a compra. A carteira permanece sem cobrança.';message.classList.remove('hidden');message.classList.add('error');button.disabled=false;button.textContent=old;}
+}
+document.getElementById('buyCreditPackButton').addEventListener('click',event=>startCreditCheckout('credit_pack_12',null,event.currentTarget));
+
+document.getElementById('referralPackageButton').addEventListener('click',()=>{
+ const notice=document.getElementById('referralPackageNotice');
+ const button=document.getElementById('referralPackageButton');
+ notice.classList.remove('hidden');
+ button.setAttribute('aria-expanded','true');
+ notice.scrollIntoView({behavior:'smooth',block:'nearest'});
+});
 document.getElementById('searchDirectory').addEventListener('click',loadDirectory);
 document.getElementById('publishOpportunity').addEventListener('click',async()=>{const btn=document.getElementById('publishOpportunity');btn.disabled=true;try{const title=document.getElementById('oppTitle').value.trim(),description=document.getElementById('oppDescription').value.trim(),category=document.getElementById('oppCategory').value.trim(),city=document.getElementById('oppCity').value.trim();if(title.length<3||description.length<10||category.length<2||city.length<2)throw new Error('Preencha título, descrição, categoria e cidade.');if(!document.getElementById('oppConsent').checked)throw new Error('Autorize a publicação antes de continuar.');const type=document.getElementById('oppType').value;const publisher_type=signedInProfile==='company'?'empresa':'profissional';const {error}=await supabase.from('opportunities').insert({publisher_user_id:signedInUser.id,publisher_type,opportunity_type:type,title,description,category,city,neighborhood:document.getElementById('oppNeighborhood').value.trim()||null,contact_method:'platform',status:'published',consent_to_publish:true});if(error)throw error;showFeatureMessage('publishMessage','Oportunidade publicada com sucesso!');['oppTitle','oppDescription','oppCategory','oppCity','oppNeighborhood'].forEach(id=>document.getElementById(id).value='');document.getElementById('oppConsent').checked=false;await loadOpportunities();}catch(err){showFeatureMessage('publishMessage',err.message||'Não foi possível publicar.',true);}finally{btn.disabled=false;}});
 async function loadPublicDirectoryPreview(){
@@ -879,14 +1050,29 @@ async function loadPublicDirectoryPreview(){
   results.append(card);
  }
 }
-function openPublicDirectoryLogin(){document.getElementById('registrationPanel').classList.remove('hidden');document.getElementById('authForm').classList.remove('hidden');document.getElementById('preCheckoutPanel').classList.add('hidden');setMode('login');selectedPlanNotice.textContent='Entre com seu e-mail e senha para acessar seu perfil completo.';document.getElementById('registrationPanel').scrollIntoView({behavior:'smooth',block:'start'});}
+function openPublicDirectoryLogin(){
+ document.getElementById('publicDirectoryPreview').classList.add('hidden');
+ document.getElementById('memberHub').classList.add('hidden');
+ document.getElementById('registrationPanel').classList.remove('hidden');
+ document.getElementById('authForm').classList.remove('hidden');
+ document.getElementById('preCheckoutPanel').classList.add('hidden');
+ setMode('login');
+ selectedPlanNotice.textContent='Entre com seu e-mail e senha para acessar seu perfil completo.';
+ document.getElementById('registrationPanel').scrollIntoView({behavior:'smooth',block:'start'});
+}
 document.getElementById('searchPublicDirectory').addEventListener('click',loadPublicDirectoryPreview);
 document.getElementById('publicDirectoryLogin').addEventListener('click',openPublicDirectoryLogin);
 document.getElementById('closePublicDirectory').addEventListener('click',()=>document.getElementById('publicDirectoryPreview').classList.add('hidden'));
-document.querySelectorAll('[data-hub-login]').forEach(btn=>btn.addEventListener('click',async()=>{
+document.addEventListener('click',async event=>{
+ const btn=event.target.closest('[data-hub-login]');
+ if(!btn)return;
+ event.preventDefault();
+ if(btn.disabled)return;
  requestedHubTarget=btn.dataset.hubLogin||'auto';
  const {data:{user}}=await supabase.auth.getUser();
  if(!user&&requestedHubTarget==='client'){
+  document.getElementById('registrationPanel').classList.add('hidden');
+  document.getElementById('memberHub').classList.add('hidden');
   document.getElementById('publicDirectoryPreview').classList.remove('hidden');
   document.getElementById('publicDirectoryPreview').scrollIntoView({behavior:'smooth',block:'start'});
   await loadPublicDirectoryPreview();
@@ -900,7 +1086,7 @@ document.querySelectorAll('[data-hub-login]').forEach(btn=>btn.addEventListener(
   return;
  }
  await openMemberAreas(user,requestedHubTarget);
-}));
+});
 
 const mediaMessage=document.getElementById('mediaMessage');
 async function loadMyMedia(){
@@ -924,6 +1110,7 @@ document.getElementById('uploadMediaButton').addEventListener('click',async()=>{
   try{
     const {data:{user},error:ue}=await supabase.auth.getUser();if(ue||!user)throw new Error('Entre na sua conta para enviar imagens.');
     const file=document.getElementById('mediaFile').files[0];if(!file)throw new Error('Escolha uma imagem primeiro.');
+    if(!document.getElementById('mediaRulesConsent').checked)throw new Error('Confirme as regras de divulgação de imagens antes de enviar.');
     if(!['image/jpeg','image/png','image/webp'].includes(file.type))throw new Error('Use JPEG, PNG ou WebP.');
     if(file.size>5*1024*1024)throw new Error('A imagem ultrapassa o limite de 5 MB.');
     const kind=document.getElementById('mediaKind').value;
@@ -933,8 +1120,8 @@ document.getElementById('uploadMediaButton').addEventListener('click',async()=>{
       if(count>=3)throw new Error('Você já utiliza as 3 imagens de serviços. Exclua uma delas para liberar uma vaga e enviar a nova. A foto de perfil não entra nesse limite.');
     }
     await uploadWallueMedia(user,file,kind,document.getElementById('mediaCaption').value.trim());
-    document.getElementById('mediaFile').value='';document.getElementById('mediaCaption').value='';
-    mediaMessage.textContent='Imagem enviada e registrada com sucesso.';mediaMessage.className='message';mediaMessage.style.display='block';await loadMyMedia();
+    document.getElementById('mediaFile').value='';document.getElementById('mediaCaption').value='';document.getElementById('mediaRulesConsent').checked=false;
+    mediaMessage.textContent='Imagem enviada e registrada. A publicação continua sujeita às regras de divulgação e à revisão da Wallue.';mediaMessage.className='message';mediaMessage.style.display='block';await loadMyMedia();
   }catch(err){mediaMessage.textContent=err.message||'Não foi possível enviar a imagem.';mediaMessage.className='message error';mediaMessage.style.display='block';}
   finally{button.disabled=false;button.textContent='Enviar imagem';}
 });
@@ -954,6 +1141,16 @@ document.querySelectorAll('[data-opening-action]').forEach(button=>button.addEve
 }));
 
 document.querySelectorAll('[data-story-tab]').forEach(tab=>tab.addEventListener('click',()=>{const key=tab.dataset.storyTab;document.querySelectorAll('[data-story-tab]').forEach(item=>{const active=item===tab;item.classList.toggle('active',active);item.setAttribute('aria-selected',active?'true':'false');});document.querySelectorAll('.story-panel').forEach(panel=>{const active=panel.id==='story-panel-'+key;panel.hidden=!active;panel.classList.toggle('active',active);});}));
+document.querySelectorAll('[data-info-open]').forEach(button=>button.addEventListener('click',()=>{
+ const targetId=button.dataset.infoOpen;
+ document.querySelectorAll('#regras-faq .info-panel').forEach(panel=>{panel.hidden=panel.id!==targetId;});
+ document.querySelectorAll('#regras-faq [data-info-open]').forEach(item=>item.setAttribute('aria-expanded',item===button?'true':'false'));
+ document.getElementById(targetId)?.scrollIntoView({behavior:'smooth',block:'start'});
+}));
+document.querySelectorAll('#regras-faq [data-info-close]').forEach(button=>button.addEventListener('click',()=>{
+ document.querySelectorAll('#regras-faq .info-panel').forEach(panel=>panel.hidden=true);
+ document.querySelectorAll('#regras-faq [data-info-open]').forEach(item=>item.setAttribute('aria-expanded','false'));
+}));
 </script>
 
 </body>
