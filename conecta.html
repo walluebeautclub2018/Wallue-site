@@ -831,6 +831,9 @@ document.getElementById('saveProfileButton').addEventListener('click',async()=>{
 function showMemberView(view){
   const panels=['myProfilePanel','profileEditPanel','mediaPanel','memberDirectory','memberOpportunities','memberInterests','memberReceived','creditWalletPanel'];
   panels.forEach(id=>document.getElementById(id)?.classList.add('hidden'));
+  // Fecha fluxos públicos e de cadastro ao navegar dentro da área autenticada.
+  document.getElementById('registrationPanel')?.classList.add('hidden');
+  document.getElementById('publicDirectoryPreview')?.classList.add('hidden');
   if(view==='menu')return;
   if(view==='wallet'){if(['professional','salon'].includes(signedInProfile)){document.getElementById('creditWalletPanel').classList.remove('hidden');loadCreditWallet();}return;}
   if(view==='profile'){document.getElementById('myProfilePanel').classList.remove('hidden');return;}
@@ -1015,7 +1018,11 @@ function openPublicDirectoryLogin(){
 document.getElementById('searchPublicDirectory').addEventListener('click',loadPublicDirectoryPreview);
 document.getElementById('publicDirectoryLogin').addEventListener('click',openPublicDirectoryLogin);
 document.getElementById('closePublicDirectory').addEventListener('click',()=>document.getElementById('publicDirectoryPreview').classList.add('hidden'));
-document.querySelectorAll('[data-hub-login]').forEach(btn=>btn.addEventListener('click',async()=>{
+document.addEventListener('click',async event=>{
+ const btn=event.target.closest('[data-hub-login]');
+ if(!btn)return;
+ event.preventDefault();
+ if(btn.disabled)return;
  requestedHubTarget=btn.dataset.hubLogin||'auto';
  const {data:{user}}=await supabase.auth.getUser();
  if(!user&&requestedHubTarget==='client'){
@@ -1034,7 +1041,7 @@ document.querySelectorAll('[data-hub-login]').forEach(btn=>btn.addEventListener(
   return;
  }
  await openMemberAreas(user,requestedHubTarget);
-}));
+});
 
 const mediaMessage=document.getElementById('mediaMessage');
 async function loadMyMedia(){
