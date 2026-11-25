@@ -125,7 +125,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const amount = (product.amountCents / 100).toFixed(2);
-    const returnUrl = new URL("https://conecta.wallue.com.br/");
+    const returnUrl = new URL("https://wallue-site-git-wallue-referral-cred-fdf60c-walluebeautclub2018.vercel.app/");
     returnUrl.searchParams.set("credit_purchase", "pending");
     const payload = {
       type: "online",
