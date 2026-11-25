@@ -1,15 +1,23 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-const cors = {
-  "Access-Control-Allow-Origin": "https://conecta.wallue.com.br",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+const allowedOrigins = new Set([
+  "https://conecta.wallue.com.br",
+  "https://wallue-site-git-wallue-referral-cred-fdf60c-walluebeautclub2018.vercel.app",
+]);
+function corsHeaders(origin: string | null) {
+  const allowed = origin && allowedOrigins.has(origin) ? origin : "https://conecta.wallue.com.br";
+  return {
+    "Access-Control-Allow-Origin": allowed,
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Vary": "Origin",
+  };
+}
 
-function json(body: unknown, status = 200) {
+function json(body: unknown, status = 200, origin: string | null = null) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...cors, "Content-Type": "application/json" },
+    headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
   });
 }
 
@@ -23,9 +31,10 @@ function validEmail(value: string) {
 }
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
-  if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders(req.headers.get("Origin")) });
+  if (req.method !== "POST") return respond({ error: "method_not_allowed" }, 405, req.headers.get("Origin"));
 
+  const respond = (body: unknown, status = 200) => json(body, status, req.headers.get("Origin"));
   try {
     // Feature flag isolada: nunca reutiliza WALLUE_BILLING_ENABLED.
     if (Deno.env.get("WALLUE_REFERRAL_CREDITS_ENABLED") !== "test") {
