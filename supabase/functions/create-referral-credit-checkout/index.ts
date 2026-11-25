@@ -31,68 +31,67 @@ function validEmail(value: string) {
 }
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders(req.headers.get("Origin")) });
-  if (req.method !== "POST") return respond({ error: "method_not_allowed" }, 405, req.headers.get("Origin"));
-
   const respond = (body: unknown, status = 200) => json(body, status, req.headers.get("Origin"));
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders(req.headers.get("Origin")) });
+  if (req.method !== "POST") return respond({ error: "method_not_allowed" }, 405);
   try {
     // Feature flag isolada: nunca reutiliza WALLUE_BILLING_ENABLED.
     if (Deno.env.get("WALLUE_REFERRAL_CREDITS_ENABLED") !== "test") {
-      return json({ error: "referral_credits_not_enabled" }, 503);
+      return respond({ error: "referral_credits_not_enabled" }, 503);
     }
 
     const authorization = req.headers.get("Authorization");
-    if (!authorization?.startsWith("Bearer ")) return json({ error: "login_required" }, 401);
+    if (!authorization?.startsWith("Bearer ")) return respond({ error: "login_required" }, 401);
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const mpToken = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");
     const environment = (Deno.env.get("MERCADOPAGO_ENVIRONMENT") ?? "").trim().toLowerCase();
-    if (!supabaseUrl || !serviceKey || !mpToken) return json({ error: "server_not_configured" }, 503);
-    if (environment !== "test") return json({ error: "referral_credits_test_environment_only" }, 503);
-    if (environment === "test" && !mpToken.startsWith("TEST-")) return json({ error: "test_access_token_required" }, 503);
-    if (environment === "production" && !mpToken.startsWith("APP_USR-")) return json({ error: "production_access_token_required" }, 503);
+    if (!supabaseUrl || !serviceKey || !mpToken) return respond({ error: "server_not_configured" }, 503);
+    if (environment !== "test") return respond({ error: "referral_credits_test_environment_only" }, 503);
+    if (environment === "test" && !mpToken.startsWith("TEST-")) return respond({ error: "test_access_token_required" }, 503);
+    if (environment === "production" && !mpToken.startsWith("APP_USR-")) return respond({ error: "production_access_token_required" }, 503);
 
     const admin = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
     const jwt = authorization.slice(7);
     const { data: authData, error: authError } = await admin.auth.getUser(jwt);
     const user = authData?.user;
-    if (authError || !user?.id || !user.email || !validEmail(user.email)) return json({ error: "invalid_session" }, 401);
+    if (authError || !user?.id || !user.email || !validEmail(user.email)) return respond({ error: "invalid_session" }, 401);
 
     const { data: profile, error: profileError } = await admin.from("wallue_profiles")
       .select("profile_type").eq("user_id", user.id).maybeSingle();
     if (profileError || !profile || !["professional", "salon"].includes(profile.profile_type)) {
-      return json({ error: "professional_profile_required" }, 403);
+      return respond({ error: "professional_profile_required" }, 403);
     }
 
     const body = await req.json().catch(() => ({}));
     const kind = body?.purchase_kind as keyof typeof PRODUCTS;
-    if (!(kind in PRODUCTS)) return json({ error: "invalid_product" }, 400);
+    if (!(kind in PRODUCTS)) return respond({ error: "invalid_product" }, 400);
     const product = PRODUCTS[kind];
 
     let referralEventId: string | null = null;
     if (kind === "single_referral") {
       referralEventId = typeof body.referral_event_id === "string" ? body.referral_event_id : null;
-      if (!referralEventId) return json({ error: "referral_event_required" }, 400);
+      if (!referralEventId) return respond({ error: "referral_event_required" }, 400);
 
       const { data: referral, error: referralError } = await admin.from("referral_events")
         .select("id,professional_user_id,fee_amount_cents,currency,status,client_consent_at,chargeable_at,paid_at")
         .eq("id", referralEventId).maybeSingle();
-      if (referralError || !referral) return json({ error: "referral_not_found" }, 404);
-      if (referral.professional_user_id !== user.id) return json({ error: "referral_not_owned" }, 403);
+      if (referralError || !referral) return respond({ error: "referral_not_found" }, 404);
+      if (referral.professional_user_id !== user.id) return respond({ error: "referral_not_owned" }, 403);
       if (referral.status !== "chargeable" || !referral.chargeable_at || !referral.client_consent_at || referral.paid_at) {
-        return json({ error: "referral_not_chargeable" }, 409);
+        return respond({ error: "referral_not_chargeable" }, 409);
       }
       // Eventos históricos a R$0,99 não são convertidos em cobranças de R$2,29.
       if (referral.fee_amount_cents !== 229 || referral.currency !== "BRL") {
-        return json({ error: "referral_uses_historical_price" }, 409);
+        return respond({ error: "referral_uses_historical_price" }, 409);
       }
 
       const { data: priorDebit, error: debitError } = await admin.from("wallue_referral_credit_ledger")
         .select("id").eq("user_id", user.id).eq("referral_event_id", referralEventId)
         .eq("transaction_type", "referral_debit").maybeSingle();
-      if (debitError) return json({ error: "referral_ledger_check_failed" }, 500);
-      if (priorDebit) return json({ error: "referral_already_unlocked" }, 409);
+      if (debitError) return respond({ error: "referral_ledger_check_failed" }, 500);
+      if (priorDebit) return respond({ error: "referral_already_unlocked" }, 409);
     }
 
     const externalReference = crypto.randomUUID();
@@ -111,7 +110,7 @@ Deno.serve(async (req: Request) => {
       .single();
     if (insertError || !purchase) {
       console.error("Credit purchase initialization failed", insertError?.message);
-      return json({ error: "purchase_initialization_failed" }, 500);
+      return respond({ error: "purchase_initialization_failed" }, 500);
     }
 
     let payerEmail = user.email.toLowerCase();
@@ -119,7 +118,7 @@ Deno.serve(async (req: Request) => {
       payerEmail = (Deno.env.get("MERCADOPAGO_TEST_PAYER_EMAIL") ?? "").trim().toLowerCase();
       if (!validEmail(payerEmail)) {
         await admin.from("wallue_referral_credit_purchases").update({ status: "failed", provider_status: "test_payer_not_configured" }).eq("id", purchase.id);
-        return json({ error: "test_payer_not_configured" }, 503);
+        return respond({ error: "test_payer_not_configured" }, 503);
       }
     }
 
@@ -157,7 +156,7 @@ Deno.serve(async (req: Request) => {
         status: "failed", provider_status: "order_creation_failed", updated_at: new Date().toISOString(),
       }).eq("id", purchase.id);
       console.error("Mercado Pago credit Order failed", mpResponse.status, mpData?.message ?? "unknown");
-      return json({ error: "mercadopago_order_creation_failed" }, 502);
+      return respond({ error: "mercadopago_order_creation_failed" }, 502);
     }
 
     const { error: updateError } = await admin.from("wallue_referral_credit_purchases").update({
@@ -166,11 +165,11 @@ Deno.serve(async (req: Request) => {
       status: "pending",
       updated_at: new Date().toISOString(),
     }).eq("id", purchase.id);
-    if (updateError) return json({ error: "order_created_but_not_saved_contact_support" }, 500);
+    if (updateError) return respond({ error: "order_created_but_not_saved_contact_support" }, 500);
 
-    return json({ checkout_url: mpData.checkout_url, purchase_id: purchase.id });
+    return respond({ checkout_url: mpData.checkout_url, purchase_id: purchase.id });
   } catch (error) {
     console.error("Referral credit checkout error", error instanceof Error ? error.message : "unknown");
-    return json({ error: "internal_error" }, 500);
+    return respond({ error: "internal_error" }, 500);
   }
 });
