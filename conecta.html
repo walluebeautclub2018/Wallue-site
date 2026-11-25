@@ -103,7 +103,15 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 @media(max-width:600px){.opening-card{margin:14px auto 22px;padding:6px;border-radius:16px}.opening-stage{border-radius:10px}}
 .social-media-strip{margin:34px 0 26px;padding:30px 22px;border:1px solid #eadfcf;border-radius:24px;background:linear-gradient(135deg,#fffaf5,#f1e8f5);text-align:center}.social-media-strip h2{margin:0 0 8px;color:var(--purple);font-family:Georgia,serif;font-size:clamp(25px,4vw,34px)}.social-media-strip>p{max-width:850px;margin:8px auto;color:var(--muted)}.social-media-strip .media-grid{max-width:920px;margin:20px auto}.social-media-strip .media-brand{min-height:100px}.social-media-strip .google-business-icon{display:block;width:42px;height:42px;flex:0 0 42px;object-fit:contain}@media(max-width:600px){.social-media-strip{padding:24px 14px}.social-media-strip .media-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
-</head>
+<style id="wallue-info-cards-uniform">
+#regras-faq .info-card-button,#regras-faq .info-close-button{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:11px 22px;border:1px solid var(--gold);border-radius:28px;background:var(--gold);color:#32104f;font:700 15px Arial,sans-serif;text-decoration:none;cursor:pointer}
+#regras-faq .info-card-button:hover,#regras-faq .info-close-button:hover{filter:brightness(.96)}
+#regras-faq .info-panel[hidden]{display:none}
+#regras-faq .info-panel{scroll-margin-top:24px}
+#regras-faq .info-panel details{padding:12px 0;border-bottom:1px solid #eadfcf}
+#regras-faq .info-panel summary{color:var(--purple);font-weight:700;cursor:pointer}
+#regras-faq .info-panel details p{margin:8px 0 0}
+</style></head>
 <body>
 <header><strong>WALLUE CONECTA</strong><span>Conexões que transformam</span></header>
 <main>
@@ -311,29 +319,37 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 </section>
 <section id="regras-faq" class="social-media-strip" aria-label="Regras e perguntas frequentes">
  <h2>Informações importantes para usar a Wallue Conecta</h2>
- <div class="feature-cards" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin:18px 0">
-  <article class="feature-card"><h3>Regras para utilização</h3><p>Conheça as condições de participação, divulgação e conexão.</p><a href="#regras-utilizacao">Consultar regras →</a></article>
-  <article class="feature-card"><h3>Perguntas e Respostas (FAQ)</h3><p>Respostas sobre cadastro, contatos, créditos e oportunidades.</p><a href="#perguntas-frequentes">Ver perguntas →</a></article>
-  <article class="feature-card"><h3>Segurança e Privacidade</h3><p>Entenda como protegemos os dados dos associados.</p><a href="#seguranca-privacidade">Ver orientações →</a></article>
+ <p>Selecione um dos cards para consultar as orientações.</p>
+ <div class="feature-cards info-cards" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin:18px auto">
+  <article class="feature-card"><h3>Regras para utilização</h3><p>Conheça as condições de participação, divulgação e conexão.</p><button type="button" class="info-card-button" data-info-panel="regras-utilizacao">Consultar regras</button></article>
+  <article class="feature-card"><h3>Perguntas e Respostas (FAQ)</h3><p>Respostas sobre cadastro, contatos, créditos e oportunidades.</p><button type="button" class="info-card-button" data-info-panel="perguntas-frequentes">Ver perguntas</button></article>
+  <article class="feature-card"><h3>Segurança e Privacidade</h3><p>Entenda como protegemos os dados dos associados.</p><button type="button" class="info-card-button" data-info-panel="seguranca-privacidade">Ver orientações</button></article>
  </div>
- <div id="regras-utilizacao" class="feature-item" style="text-align:left;background:#fff;color:#32104f"><h3>Regras para utilização da plataforma</h3><ul>
-  <li>Forneça informações verdadeiras e mantenha seu cadastro atualizado.</li>
-  <li>Respeite clientes, profissionais, empresas e demais associados.</li>
-  <li>Não publique telefone, WhatsApp, e-mail, QR Code ou links de contato em fotos, artes ou materiais de divulgação.</li>
-  <li>Não exponha dados pessoais de clientes ou terceiros sem autorização.</li>
-  <li>Imagens e conteúdos podem ser recusados ou removidos quando violarem estas regras.</li>
-  <li>A Wallue Conecta aproxima pessoas e oportunidades, mas não garante contratação, quantidade de contatos ou resultado financeiro.</li>
-  <li>Um crédito libera um contato elegível, não garante contratação.</li>
- </ul></div>
- <div id="perguntas-frequentes" class="feature-item" style="text-align:left;background:#fff;color:#32104f"><h3>Perguntas e Respostas (FAQ)</h3>
+ <div id="regras-utilizacao" class="feature-panel info-panel" hidden style="text-align:left">
+  <h3>Regras para utilização da plataforma</h3><ul>
+   <li>Forneça informações verdadeiras e mantenha seu cadastro atualizado.</li>
+   <li>Respeite clientes, profissionais, empresas e demais associados.</li>
+   <li>Não publique telefone, WhatsApp, e-mail, QR Code ou links de contato em fotos, artes ou materiais de divulgação.</li>
+   <li>Não exponha dados pessoais de clientes ou terceiros sem autorização.</li>
+   <li>Imagens e conteúdos podem ser recusados ou removidos quando violarem estas regras.</li>
+   <li>A Wallue Conecta aproxima pessoas e oportunidades, mas não garante contratação, quantidade de contatos ou resultado financeiro.</li>
+   <li>Um crédito libera um contato elegível, não garante contratação.</li>
+  </ul><button type="button" class="info-close-button">Fechar</button>
+ </div>
+ <div id="perguntas-frequentes" class="feature-panel info-panel" hidden style="text-align:left">
+  <h3>Perguntas e Respostas (FAQ)</h3>
   <details><summary>Quem pode se cadastrar?</summary><p>Clientes, profissionais autônomos, proprietários de salão e empresas, conforme as opções de cadastro e planos disponíveis.</p></details>
   <details><summary>Meu telefone, WhatsApp e e-mail ficam públicos?</summary><p>Não. Dados privados não devem aparecer nos cards públicos nem nas imagens. O compartilhamento segue o fluxo autorizado da plataforma.</p></details>
   <details><summary>Posso colocar meu WhatsApp ou e-mail nas fotos?</summary><p>Não. Imagens com telefone, WhatsApp, e-mail, QR Code ou links de contato são proibidas e podem ser reprovadas ou removidas.</p></details>
   <details><summary>O que posso publicar no meu perfil?</summary><p>Imagens e informações relacionadas aos serviços e trabalhos realizados, respeitando as regras de conteúdo, privacidade e autorização de uso de imagem.</p></details>
   <details><summary>O crédito garante que vou conseguir um cliente?</summary><p>Não. O crédito permite desbloquear um contato elegível, mas não garante resposta, contratação ou prestação do serviço.</p></details>
   <details><summary>Como funciona a relação depois da conexão?</summary><p>A Wallue Conecta facilita a aproximação. A negociação e a execução do serviço são tratadas diretamente entre as partes.</p></details>
+  <button type="button" class="info-close-button">Fechar</button>
  </div>
- <div id="seguranca-privacidade" class="feature-item" style="text-align:left;background:#fff;color:#32104f"><h3>Segurança e privacidade</h3><p>Não compartilhe senhas ou códigos de acesso. Não publique dados pessoais em imagens. Denuncie conteúdos que exponham informações privadas.</p></div>
+ <div id="seguranca-privacidade" class="feature-panel info-panel" hidden style="text-align:left">
+  <h3>Segurança e Privacidade</h3><p>Não compartilhe senhas ou códigos de acesso. Não publique dados pessoais em imagens. Denuncie conteúdos que exponham informações privadas. Os dados de contato são compartilhados somente pelo fluxo autorizado da plataforma.</p>
+  <button type="button" class="info-close-button">Fechar</button>
+ </div>
 </section>
 <section class="social-media-strip" id="redes-sociais" aria-label="Canais oficiais de divulgação da Wallue Conecta">
 <h2>Encontre a Wallue Conecta nas mídias sociais</h2>
@@ -364,6 +380,17 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 <footer><strong>WALLUE CONECTA</strong><div>Conexões que transformam.</div><p style="margin:14px auto 0;font-size:14px;line-height:1.6">Dúvidas ou precisa de ajuda? Fale com nossa equipe:<br><a href="mailto:suporte.conecta@wallue.com.br" style="color:inherit;font-weight:700;text-decoration:underline">suporte.conecta@wallue.com.br</a></p></footer>
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+document.querySelectorAll('#regras-faq [data-info-panel]').forEach(button=>{
+ button.addEventListener('click',()=>{
+  const target=document.getElementById(button.dataset.infoPanel);
+  const wasOpen=target&&!target.hidden;
+  document.querySelectorAll('#regras-faq .info-panel').forEach(panel=>panel.hidden=true);
+  if(target&&!wasOpen){target.hidden=false;target.scrollIntoView({behavior:'smooth',block:'start'});}
+ });
+});
+document.querySelectorAll('#regras-faq .info-close-button').forEach(button=>button.addEventListener('click',()=>{
+ const panel=button.closest('.info-panel');if(panel)panel.hidden=true;
+}));
 const SUPABASE_URL='https://jfpjokqdaobgxfplupqr.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_ZgS9uChB0Kxc3ssWlbb0lQ_q-G97h9c';
 const supabase=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
