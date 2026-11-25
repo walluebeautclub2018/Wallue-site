@@ -18,10 +18,6 @@ as $$
 declare
   v_purchase public.wallue_referral_credit_purchases%rowtype;
 begin
-  if auth.role() <> 'service_role' then
-    raise exception 'service_role_required' using errcode = '42501';
-  end if;
-
   if p_provider_order_id is null or p_provider_payment_id is null
      or p_provider_status <> 'processed'
      or p_currency <> 'BRL' or p_paid_amount_cents <= 0 then
@@ -78,6 +74,17 @@ begin
     end
   ) on conflict (idempotency_key) do nothing;
 
+  if not exists (
+    select 1 from public.wallue_referral_credit_ledger
+    where purchase_id = v_purchase.id
+      and user_id = v_purchase.user_id
+      and transaction_type = 'purchase_credit'
+      and credits_delta = v_purchase.credits_purchased
+      and idempotency_key = 'purchase:' || v_purchase.id::text
+  ) then
+    raise exception 'purchase_credit_ledger_mismatch' using errcode = '23514';
+  end if;
+
   if v_purchase.purchase_kind = 'single_referral' then
     if v_purchase.referral_event_id is null then
       raise exception 'single_referral_missing_event' using errcode = '23514';
@@ -106,6 +113,17 @@ begin
       'referral:' || v_purchase.referral_event_id::text,
       'Crédito consumido para desbloquear contato'
     ) on conflict (idempotency_key) do nothing;
+
+    if not exists (
+      select 1 from public.wallue_referral_credit_ledger
+      where user_id = v_purchase.user_id
+        and referral_event_id = v_purchase.referral_event_id
+        and transaction_type = 'referral_debit'
+        and credits_delta = -1
+        and idempotency_key = 'referral:' || v_purchase.referral_event_id::text
+    ) then
+      raise exception 'referral_debit_ledger_mismatch' using errcode = '23514';
+    end if;
   end if;
 
   return query select true, 'approved'::text, v_purchase.credits_purchased;
