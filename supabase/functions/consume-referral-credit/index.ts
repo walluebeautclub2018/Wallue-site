@@ -46,22 +46,14 @@ Deno.serve(async (req: Request) => {
       return reply({ error: code }, status);
     }
 
-    const clientUserId = consumed[0].client_user_id;
-    const { data: client, error: clientError } = await admin.from("wallue_profiles")
-      .select("full_name,whatsapp,city,neighborhood").eq("user_id", clientUserId).maybeSingle();
-    if (clientError || !client?.whatsapp) {
-      console.error("Unlocked contact profile unavailable", clientError?.message ?? "missing_whatsapp");
-      return reply({ error: "contact_unlocked_but_contact_details_unavailable", credits_remaining: consumed[0].credits_remaining }, 200);
-    }
-
     return reply({
       unlocked: true,
       credits_remaining: consumed[0].credits_remaining,
       contact: {
-        name: client.full_name ?? "Cliente Wallue",
-        whatsapp: client.whatsapp,
-        city: client.city ?? "",
-        neighborhood: client.neighborhood ?? "",
+        name: consumed[0].contact_name ?? "Cliente Wallue",
+        whatsapp: consumed[0].contact_whatsapp,
+        city: consumed[0].contact_city ?? "",
+        neighborhood: consumed[0].contact_neighborhood ?? "",
       },
     });
   } catch (error) {
