@@ -36,7 +36,7 @@ Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return respond({ error: "method_not_allowed" }, 405);
   try {
     // Feature flag isolada: nunca reutiliza WALLUE_BILLING_ENABLED.
-    if (Deno.env.get("WALLUE_REFERRAL_CREDITS_ENABLED") !== "test") {
+    if (Deno.env.get("WALLUE_REFERRAL_CREDITS_ENABLED") !== "true") {
       return respond({ error: "referral_credits_not_enabled" }, 503);
     }
 
@@ -50,8 +50,8 @@ Deno.serve(async (req: Request) => {
       ? Deno.env.get("MERCADOPAGO_REFERRAL_TEST_ACCESS_TOKEN")
       : Deno.env.get("MERCADOPAGO_REFERRAL_ACCESS_TOKEN");
     if (!supabaseUrl || !serviceKey || !mpToken) return respond({ error: "server_not_configured" }, 503);
-    if (environment !== "test") return respond({ error: "referral_credits_test_environment_only" }, 503);
-    if (!mpToken.startsWith("TEST-")) return respond({ error: "test_access_token_required" }, 503);
+    if (environment !== "production") return respond({ error: "referral_credits_production_environment_required" }, 503);
+    if (!mpToken.startsWith("APP_USR-")) return respond({ error: "production_access_token_required" }, 503);
 
     const admin = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
     const jwt = authorization.slice(7);
@@ -115,17 +115,10 @@ Deno.serve(async (req: Request) => {
       return respond({ error: "purchase_initialization_failed" }, 500);
     }
 
-    let payerEmail = user.email.toLowerCase();
-    if (environment === "test") {
-      payerEmail = (Deno.env.get("MERCADOPAGO_TEST_PAYER_EMAIL") ?? "").trim().toLowerCase();
-      if (!validEmail(payerEmail)) {
-        await admin.from("wallue_referral_credit_purchases").update({ status: "failed", provider_status: "test_payer_not_configured" }).eq("id", purchase.id);
-        return respond({ error: "test_payer_not_configured" }, 503);
-      }
-    }
+    const payerEmail = user.email.toLowerCase();
 
     const amount = (product.amountCents / 100).toFixed(2);
-    const returnUrl = new URL("https://wallue-site-git-wallue-referral-cred-fdf60c-walluebeautclub2018.vercel.app/");
+    const returnUrl = new URL("https://conecta.wallue.com.br/");
     returnUrl.searchParams.set("credit_purchase", "pending");
     const payload = {
       type: "online",
