@@ -178,12 +178,12 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 
 
 <section class="panel" style="margin:0 auto 24px;max-width:980px">
-<h2 style="color:var(--purple);margin-top:0">Encaminhamentos transparentes</h2>
-<p>O cliente não paga taxa por encaminhamento. Para o profissional, há duas opções: <strong>R$ 0,99 por encaminhamento válido</strong> ou o <strong>Pacote Promocional de Encaminhamentos por R$ 16,99/mês</strong>, com encaminhamentos ilimitados durante o mês contratado e sem cobrança individual adicional por contato. O encaminhamento avulso só é cobrado quando o cliente solicita o contato, autoriza o compartilhamento e o contato é efetivamente entregue. Busca e visualização de perfil não geram cobrança.</p>
-<p class="fine">Cada encaminhamento será registrado uma única vez. A cobrança automática ainda depende da implementação e dos testes de pagamento; não está ativa.</p>
-<button class="primary" id="referralPackageButton" type="button" aria-controls="referralPackageNotice" aria-expanded="false">Consultar disponibilidade do pacote</button>
-<div class="feature-message hidden" id="referralPackageNotice" role="status" aria-live="polite">O pacote está em preparação. Esta consulta não inicia pagamento nem cobrança. A contratação será liberada quando a integração específica estiver concluída e validada.</div>
-<p class="fine">Benefício opcional para profissionais e salões cadastrados. O botão permite consultar a disponibilidade, sem iniciar cobrança nesta etapa.</p>
+<h2 style="color:var(--purple);margin-top:0">Carteira de créditos para conexões</h2>
+<p>O cliente não paga para solicitar um serviço. Para profissionais e salões, o desbloqueio de cada contato autorizado custa <strong>R$ 2,29 por indicação</strong>. Também haverá o <strong>pacote de 12 créditos por R$ 16,99</strong>.</p>
+<p class="fine">Um crédito libera um contato. Os créditos são pré-pagos e não expiram enquanto não forem utilizados. A compra não garante quantidade de clientes ou contratações. A busca e a visualização de perfis continuam gratuitas.</p>
+<button class="primary" id="referralPackageButton" type="button" aria-controls="referralPackageNotice" aria-expanded="false">Conhecer a carteira de créditos</button>
+<div class="feature-message hidden" id="referralPackageNotice" role="status" aria-live="polite">Carteira Wallue: R$ 2,29 por desbloqueio ou pacote com 12 créditos por R$ 16,99. A contratação ficará disponível após a validação final do checkout e do webhook do Mercado Pago. Nenhuma cobrança é iniciada por esta consulta.</div>
+<p class="fine">Disponível para profissionais e salões associados. A assinatura mensal da plataforma continua separada da compra de créditos.</p>
 </section>
 <section class="panel hidden" id="registrationPanel" aria-label="Cadastro ou entrada">
 <div id="selectedPlanNotice" class="message" style="display:block;margin:0 0 16px">Escolha uma modalidade ou entre na sua conta.</div>
@@ -604,7 +604,7 @@ city,neighborhood:profile==='company'?'':document.getElementById('neighborhood')
 whatsapp,service_interest:service,instagram_url:profile==='client'?null:instagramUrl,
 planned_monthly_price_cents:profile==='client'?499:1699,
 plan_code,
-referral_fee_cents:profile==='professional'||profile==='salon'?99:null,
+referral_fee_cents:profile==='professional'||profile==='salon'?229:null,
 consent_to_data_processing:true,
 client_intent:profile==='client'?document.getElementById('clientIntent').value:null,
 has_cleaning_team:profile==='client'&&document.getElementById('clientIntent').value==='job_opportunities'?document.getElementById('hasCleaningTeam').value==='true':false,
