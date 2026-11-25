@@ -268,7 +268,19 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,selec
 <button type="button" data-member-view="profile">Acessar perfil</button>
 <button type="button" data-member-view="edit">Atualizar cadastro</button>
 <button type="button" data-member-view="area" id="memberAreaButton">Área de divulgação e conexões</button>
+<button type="button" data-member-view="wallet" id="memberWalletButton" class="hidden">Carteira de créditos</button>
 </nav>
+<section class="feature-panel hidden" id="creditWalletPanel">
+<div class="feature-actions member-back"><button type="button" data-member-view="menu">Voltar ao menu</button></div>
+<h3>Minha carteira de créditos</h3>
+<p class="fine">Use créditos para desbloquear contatos de clientes que autorizaram o compartilhamento. Um crédito libera um contato.</p>
+<div class="feature-item"><strong>Saldo disponível</strong><div id="creditWalletBalance" style="font-size:30px;font-weight:800;color:var(--purple)">— créditos</div><p class="fine" id="creditWalletStatus">Consultando sua carteira…</p></div>
+<div class="feature-actions"><button type="button" id="buyCreditPackButton" class="primary">Comprar 12 créditos — R$ 16,99</button></div>
+<h4 style="color:var(--purple)">Indicações disponíveis para desbloqueio</h4>
+<div id="chargeableReferrals" class="feature-list"></div>
+<div id="creditWalletMessage" class="feature-message hidden" role="status" aria-live="polite"></div>
+<p class="fine">Créditos pré-pagos não expiram enquanto não utilizados. A compra não garante volume de indicações. A assinatura mensal da plataforma é independente.</p>
+</section>
 <section class="feature-panel hidden" id="myProfilePanel"><h3>Meu perfil</h3><p class="fine">Confira as informações apresentadas no seu perfil Wallue.</p><div id="profilePreview" class="feature-item"></div><div class="feature-actions member-back"><button type="button" data-member-view="menu">Voltar ao menu</button></div></section>
 <section class="feature-panel hidden" id="profileEditPanel"><h3>Atualizar cadastro</h3><p class="fine">Altere seus dados e salve as atualizações.</p><div class="feature-form"><div><label for="editFullName">Nome completo</label><input id="editFullName" maxlength="120"></div><div id="editCompanyWrap" class="hidden"><label for="editCompanyName">Nome da empresa</label><input id="editCompanyName" maxlength="150"></div><div><label for="editCity">Cidade</label><input id="editCity" maxlength="100"></div><div><label for="editNeighborhood">Bairro</label><input id="editNeighborhood" maxlength="100"></div><div><label for="editWhatsapp">WhatsApp</label><input id="editWhatsapp" type="tel" maxlength="20"></div><div><label for="editService">Profissão, serviço ou interesse</label><input id="editService" maxlength="150"></div><div class="wide" id="editInstagramWrap"><label for="editInstagram">Instagram (opcional)</label><input id="editInstagram" type="url" placeholder="https://www.instagram.com/seuperfil/"></div></div><div class="feature-actions"><button type="button" id="saveProfileButton">Salvar alterações</button><button type="button" data-member-view="menu">Voltar ao menu</button></div><div id="profileEditMessage" class="feature-message hidden"></div></section><section class="panel hidden" id="mediaPanel"><div class="feature-actions member-back"><button type="button" data-member-view="menu">Voltar ao menu</button></div>
 <h2>Meu perfil e minhas fotos</h2>
@@ -817,9 +829,10 @@ async function renderProfilePreview(p){const box=document.getElementById('profil
 document.getElementById('saveProfileButton').addEventListener('click',async()=>{const b=document.getElementById('saveProfileButton'),m=document.getElementById('profileEditMessage');b.disabled=true;try{const full_name=document.getElementById('editFullName').value.trim(),city=document.getElementById('editCity').value.trim(),whatsapp=document.getElementById('editWhatsapp').value.trim(),instagram_url=document.getElementById('editInstagram').value.trim();if(full_name.length<2||city.length<2)throw new Error('Informe nome completo e cidade.');const digits=whatsapp.replace(/\\D/g,'');if(digits.length<10||digits.length>15)throw new Error('Informe um WhatsApp válido com DDD.');if(instagram_url){const u=new URL(instagram_url);if(!['instagram.com','www.instagram.com'].includes(u.hostname.toLowerCase()))throw new Error('Informe um link válido do Instagram.');}const patch={full_name,city,neighborhood:document.getElementById('editNeighborhood').value.trim()||null,whatsapp,service_interest:document.getElementById('editService').value.trim()||null,instagram_url:instagram_url||null,updated_at:new Date().toISOString()};if(signedInProfile==='company')patch.company_name=document.getElementById('editCompanyName').value.trim();const {error}=await supabase.from('wallue_profiles').update(patch).eq('user_id',signedInUser.id);if(error)throw error;const {data:p,error:re}=await supabase.from('wallue_profiles').select('profile_type,full_name,company_name,city,neighborhood,service_interest,instagram_url').eq('user_id',signedInUser.id).single();if(re)throw re;await renderProfilePreview(p);m.textContent='Perfil atualizado com sucesso.';m.classList.remove('hidden','error');}catch(e){m.textContent=e.message||'Não foi possível salvar.';m.classList.remove('hidden');m.classList.add('error');}finally{b.disabled=false;}});
 
 function showMemberView(view){
-  const panels=['myProfilePanel','profileEditPanel','mediaPanel','memberDirectory','memberOpportunities','memberInterests','memberReceived'];
+  const panels=['myProfilePanel','profileEditPanel','mediaPanel','memberDirectory','memberOpportunities','memberInterests','memberReceived','creditWalletPanel'];
   panels.forEach(id=>document.getElementById(id)?.classList.add('hidden'));
   if(view==='menu')return;
+  if(view==='wallet'){if(['professional','salon'].includes(signedInProfile)){document.getElementById('creditWalletPanel').classList.remove('hidden');loadCreditWallet();}return;}
   if(view==='profile'){document.getElementById('myProfilePanel').classList.remove('hidden');return;}
   if(view==='edit'){document.getElementById('profileEditPanel').classList.remove('hidden');return;}
   if(view==='directory'){
@@ -888,6 +901,7 @@ async function openMemberAreas(user,target='auto'){
   document.getElementById('mediaPanel').classList.toggle('hidden',!['professional','salon'].includes(profile.profile_type));
   document.getElementById('opportunityComposer').classList.toggle('hidden',!canPublish);
   document.getElementById('memberAreaButton').textContent=profile.profile_type==='client'?'Área de conexões':'Área de divulgação';
+  document.getElementById('memberWalletButton').classList.toggle('hidden',!['professional','salon'].includes(profile.profile_type));
   if(['professional','salon'].includes(profile.profile_type)){await uploadPendingProfilePhoto(user);await loadMyMedia();}
   await renderProfilePreview(profile);
   const profileLabels={client:'Cliente',professional:'Profissional',salon:'Salão de beleza',company:'Empresa'};
@@ -909,6 +923,41 @@ async function openMemberAreas(user,target='auto'){
     document.getElementById('memberOpportunities').scrollIntoView({behavior:'smooth',block:'start'});
   }
 }
+async function loadCreditWallet(){
+ const balance=document.getElementById('creditWalletBalance');
+ const status=document.getElementById('creditWalletStatus');
+ const list=document.getElementById('chargeableReferrals');
+ const message=document.getElementById('creditWalletMessage');
+ balance.textContent='… créditos';status.textContent='Atualizando saldo';list.innerHTML='';
+ try{
+  const {data:ledger,error:ledgerError}=await supabase.from('wallue_referral_credit_ledger').select('credits_delta').eq('user_id',signedInUser.id);
+  if(ledgerError)throw ledgerError;
+  const total=(ledger||[]).reduce((sum,row)=>sum+Number(row.credits_delta||0),0);
+  balance.textContent=Math.max(0,total)+' créditos';
+  status.textContent='Créditos disponíveis para desbloqueios';
+  const {data:events,error:eventError}=await supabase.from('referral_events')
+   .select('id,referral_key,created_at,fee_amount_cents,status,chargeable_at')
+   .eq('professional_user_id',signedInUser.id).eq('status','chargeable')
+   .eq('fee_amount_cents',229).eq('currency','BRL').is('paid_at',null)
+   .order('chargeable_at',{ascending:true}).limit(30);
+  if(eventError)throw eventError;
+  if(!events?.length){list.innerHTML='<p class="fine">Nenhuma indicação disponível para desbloqueio no momento.</p>';return;}
+  list.innerHTML=events.map(event=>'<div class="feature-item"><strong>Indicação disponível</strong><p class="fine">Valor: R$ 2,29</p><button type="button" class="primary" data-buy-referral="'+esc(event.id)+'">Desbloquear contato</button></div>').join('');
+  list.querySelectorAll('[data-buy-referral]').forEach(button=>button.addEventListener('click',()=>startCreditCheckout('single_referral',button.dataset.buyReferral,button)));
+ }catch(error){status.textContent='Não foi possível consultar o saldo.';message.textContent=error.message||'Erro ao consultar carteira.';message.classList.remove('hidden');message.classList.add('error');}
+}
+async function startCreditCheckout(kind,referralId,button){
+ const message=document.getElementById('creditWalletMessage');
+ button.disabled=true;const old=button.textContent;button.textContent='Preparando pagamento…';
+ try{
+  const {data,error}=await supabase.functions.invoke('create-referral-credit-checkout',{body:{purchase_kind:kind,...(referralId?{referral_event_id:referralId}:{})}});
+  if(error)throw error;
+  if(!data?.checkout_url)throw new Error(data?.error||'O Mercado Pago não retornou o link de pagamento.');
+  location.assign(data.checkout_url);
+ }catch(error){message.textContent=error.message||'Não foi possível iniciar a compra. A carteira permanece sem cobrança.';message.classList.remove('hidden');message.classList.add('error');button.disabled=false;button.textContent=old;}
+}
+document.getElementById('buyCreditPackButton').addEventListener('click',event=>startCreditCheckout('credit_pack_12',null,event.currentTarget));
+
 document.getElementById('referralPackageButton').addEventListener('click',()=>{
  const notice=document.getElementById('referralPackageNotice');
  const button=document.getElementById('referralPackageButton');
