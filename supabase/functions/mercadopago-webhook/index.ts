@@ -49,10 +49,11 @@ Deno.serve(async (req: Request) => {
 
   try {
     const secret = Deno.env.get("MERCADOPAGO_WEBHOOK_SECRET");
+    const referralTestSecret = Deno.env.get("MERCADOPAGO_REFERRAL_TEST_WEBHOOK_SECRET");
     const token = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    if (!secret || !token || !supabaseUrl || !serviceKey) {
+    if ((!secret && !referralTestSecret) || !token || !supabaseUrl || !serviceKey) {
       console.error("Webhook secrets/configuration missing.");
       return reply(503, { error: "webhook_not_configured" });
     }
@@ -69,7 +70,10 @@ Deno.serve(async (req: Request) => {
     const resourceId = dataId || String(bodyData.id ?? "");
     const eventType = url.searchParams.get("type") || String(body.type ?? "");
     if (!resourceId) return reply(400, { error: "missing_resource_id" });
-    if (!(await validSignature(req, resourceId, secret))) {
+    const productionSignatureValid = secret ? await validSignature(req, resourceId, secret) : false;
+    const referralTestSignatureValid = referralTestSecret
+      ? await validSignature(req, resourceId, referralTestSecret) : false;
+    if (!productionSignatureValid && !referralTestSignatureValid) {
       return reply(401, { error: "invalid_signature" });
     }
 
